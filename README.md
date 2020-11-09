@@ -10,7 +10,7 @@ features:
 -colocar os partidos em cores nos nós. <br>
 -colocar as cores nos nós de acordo com alinhamento ao governo atual <br>
 
-tabelas necessárias:
+tabelas necessárias: <br>
 -http://legis.senado.leg.br/dadosabertos/senador/22 <br>
 -http://legis.senado.leg.br/dadosabertos/senador/22/filiacoes <br>
 -http://legis.senado.leg.br/dadosabertos/senador/22/votacoes <br>
