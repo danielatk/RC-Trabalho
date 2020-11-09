@@ -1,0 +1,9 @@
+<?xml version = '1.0' encoding='UTF-8'?>
+<FiliacaoParlamentar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://legis.senado.leg.br/dadosabertos/dados/FiliacaoParlamentarv4.xsd">
+   <Metadados>
+      <Versao>07/11/2020 11:16:10</Versao><VersaoServico>4</VersaoServico><DescricaoDataSet>Filiações partidárias do parlamentar ao longo do(s) mandato(s)</DescricaoDataSet>
+   </Metadados>
+   <Parlamentar>
+      <IdentificacaoParlamentar><CodigoParlamentar>5422</CodigoParlamentar><CodigoPublicoNaLegAtual>868</CodigoPublicoNaLegAtual><NomeParlamentar>Marcos Rogério</NomeParlamentar><NomeCompletoParlamentar>Marcos Rogério da Silva Brito</NomeCompletoParlamentar><SexoParlamentar>Masculino</SexoParlamentar><FormaTratamento>Senador </FormaTratamento><UrlFotoParlamentar>http://www.senado.leg.br/senadores/img/fotos-oficiais/senador5422.jpg</UrlFotoParlamentar><UrlPaginaParlamentar>http://www25.senado.leg.br/web/senadores/senador/-/perfil/5422</UrlPaginaParlamentar><EmailParlamentar>sen.marcosrogerio@senado.leg.br</EmailParlamentar><SiglaPartidoParlamentar>DEM</SiglaPartidoParlamentar><UfParlamentar>RO</UfParlamentar></IdentificacaoParlamentar><Filiacoes><Filiacao><Partido><CodigoPartido>554</CodigoPartido><SiglaPartido>DEM</SiglaPartido><NomePartido>Democratas</NomePartido></Partido><DataFiliacao>2016-03-17</DataFiliacao></Filiacao><Filiacao><Partido><CodigoPartido>20</CodigoPartido><SiglaPartido>PDT</SiglaPartido><NomePartido>Partido Democrático Trabalhista</NomePartido></Partido><DataFiliacao>2011-11-17</DataFiliacao><DataDesfiliacao>2016-03-16</DataDesfiliacao></Filiacao></Filiacoes><UrlGlossario>http://legis.senado.leg.br/dadosabertos/senador/</UrlGlossario>
+   </Parlamentar>
+</FiliacaoParlamentar>

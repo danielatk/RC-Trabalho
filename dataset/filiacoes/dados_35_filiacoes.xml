@@ -1,0 +1,9 @@
+<?xml version = '1.0' encoding='UTF-8'?>
+<FiliacaoParlamentar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://legis.senado.leg.br/dadosabertos/dados/FiliacaoParlamentarv4.xsd">
+   <Metadados>
+      <Versao>07/11/2020 11:16:07</Versao><VersaoServico>4</VersaoServico><DescricaoDataSet>Filiações partidárias do parlamentar ao longo do(s) mandato(s)</DescricaoDataSet>
+   </Metadados>
+   <Parlamentar>
+      <IdentificacaoParlamentar><CodigoParlamentar>35</CodigoParlamentar><CodigoPublicoNaLegAtual>932</CodigoPublicoNaLegAtual><NomeParlamentar>Jader Barbalho</NomeParlamentar><NomeCompletoParlamentar>Jader Fontenelle Barbalho</NomeCompletoParlamentar><SexoParlamentar>Masculino</SexoParlamentar><FormaTratamento>Senador </FormaTratamento><UrlFotoParlamentar>http://www.senado.leg.br/senadores/img/fotos-oficiais/senador35.jpg</UrlFotoParlamentar><UrlPaginaParlamentar>http://www25.senado.leg.br/web/senadores/senador/-/perfil/35</UrlPaginaParlamentar><UrlPaginaParticular>http://jaderbarbalho.com.br/</UrlPaginaParticular><EmailParlamentar>sen.jaderbarbalho@senado.leg.br</EmailParlamentar><SiglaPartidoParlamentar>MDB</SiglaPartidoParlamentar><UfParlamentar>PA</UfParlamentar></IdentificacaoParlamentar><Filiacoes><Filiacao><Partido><CodigoPartido>33</CodigoPartido><SiglaPartido>MDB</SiglaPartido><NomePartido>Movimento Democrático Brasileiro</NomePartido></Partido><DataFiliacao>1995-02-01</DataFiliacao></Filiacao></Filiacoes><UrlGlossario>http://legis.senado.leg.br/dadosabertos/senador/</UrlGlossario>
+   </Parlamentar>
+</FiliacaoParlamentar>

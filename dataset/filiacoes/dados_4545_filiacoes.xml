@@ -1,0 +1,9 @@
+<?xml version = '1.0' encoding='UTF-8'?>
+<FiliacaoParlamentar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://legis.senado.leg.br/dadosabertos/dados/FiliacaoParlamentarv4.xsd">
+   <Metadados>
+      <Versao>07/11/2020 11:16:07</Versao><VersaoServico>4</VersaoServico><DescricaoDataSet>Filiações partidárias do parlamentar ao longo do(s) mandato(s)</DescricaoDataSet>
+   </Metadados>
+   <Parlamentar>
+      <IdentificacaoParlamentar><CodigoParlamentar>4545</CodigoParlamentar><CodigoPublicoNaLegAtual>823</CodigoPublicoNaLegAtual><NomeParlamentar>Jarbas Vasconcelos</NomeParlamentar><NomeCompletoParlamentar>Jarbas de Andrade Vasconcelos</NomeCompletoParlamentar><SexoParlamentar>Masculino</SexoParlamentar><FormaTratamento>Senador </FormaTratamento><UrlFotoParlamentar>http://www.senado.leg.br/senadores/img/fotos-oficiais/senador4545.jpg</UrlFotoParlamentar><UrlPaginaParlamentar>http://www25.senado.leg.br/web/senadores/senador/-/perfil/4545</UrlPaginaParlamentar><EmailParlamentar>sen.jarbasvasconcelos@senado.leg.br</EmailParlamentar><SiglaPartidoParlamentar>MDB</SiglaPartidoParlamentar><UfParlamentar>PE</UfParlamentar></IdentificacaoParlamentar><Filiacoes><Filiacao><Partido><CodigoPartido>33</CodigoPartido><SiglaPartido>MDB</SiglaPartido><NomePartido>Movimento Democrático Brasileiro</NomePartido></Partido><DataFiliacao>2018-05-21</DataFiliacao></Filiacao><Filiacao><Partido><CodigoPartido>33</CodigoPartido><SiglaPartido>MDB</SiglaPartido><NomePartido>Movimento Democrático Brasileiro</NomePartido></Partido><DataFiliacao>2007-02-01</DataFiliacao><DataDesfiliacao>2018-05-20</DataDesfiliacao></Filiacao></Filiacoes><UrlGlossario>http://legis.senado.leg.br/dadosabertos/senador/</UrlGlossario>
+   </Parlamentar>
+</FiliacaoParlamentar>

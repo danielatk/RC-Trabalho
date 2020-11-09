@@ -1,0 +1,9 @@
+<?xml version = '1.0' encoding='UTF-8'?>
+<FiliacaoParlamentar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://legis.senado.leg.br/dadosabertos/dados/FiliacaoParlamentarv4.xsd">
+   <Metadados>
+      <Versao>07/11/2020 11:16:13</Versao><VersaoServico>4</VersaoServico><DescricaoDataSet>Filiações partidárias do parlamentar ao longo do(s) mandato(s)</DescricaoDataSet>
+   </Metadados>
+   <Parlamentar>
+      <IdentificacaoParlamentar><CodigoParlamentar>5527</CodigoParlamentar><CodigoPublicoNaLegAtual>939</CodigoPublicoNaLegAtual><NomeParlamentar>Simone Tebet</NomeParlamentar><NomeCompletoParlamentar>Simone Nassar Tebet</NomeCompletoParlamentar><SexoParlamentar>Feminino</SexoParlamentar><FormaTratamento>Senadora </FormaTratamento><UrlFotoParlamentar>http://www.senado.leg.br/senadores/img/fotos-oficiais/senador5527.jpg</UrlFotoParlamentar><UrlPaginaParlamentar>http://www25.senado.leg.br/web/senadores/senador/-/perfil/5527</UrlPaginaParlamentar><UrlPaginaParticular>https://simonetebet.com.br/</UrlPaginaParticular><EmailParlamentar>sen.simonetebet@senado.leg.br</EmailParlamentar><SiglaPartidoParlamentar>MDB</SiglaPartidoParlamentar><UfParlamentar>MS</UfParlamentar></IdentificacaoParlamentar><Filiacoes><Filiacao><Partido><CodigoPartido>33</CodigoPartido><SiglaPartido>MDB</SiglaPartido><NomePartido>Movimento Democrático Brasileiro</NomePartido></Partido><DataFiliacao>2015-02-01</DataFiliacao></Filiacao></Filiacoes><UrlGlossario>http://legis.senado.leg.br/dadosabertos/senador/</UrlGlossario>
+   </Parlamentar>
+</FiliacaoParlamentar>

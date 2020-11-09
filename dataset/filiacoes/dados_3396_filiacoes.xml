@@ -1,0 +1,9 @@
+<?xml version = '1.0' encoding='UTF-8'?>
+<FiliacaoParlamentar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://legis.senado.leg.br/dadosabertos/dados/FiliacaoParlamentarv4.xsd">
+   <Metadados>
+      <Versao>07/11/2020 11:16:13</Versao><VersaoServico>4</VersaoServico><DescricaoDataSet>Filiações partidárias do parlamentar ao longo do(s) mandato(s)</DescricaoDataSet>
+   </Metadados>
+   <Parlamentar>
+      <IdentificacaoParlamentar><CodigoParlamentar>3396</CodigoParlamentar><CodigoPublicoNaLegAtual>812</CodigoPublicoNaLegAtual><NomeParlamentar>Tasso Jereissati</NomeParlamentar><NomeCompletoParlamentar>Tasso Ribeiro Jereissati</NomeCompletoParlamentar><SexoParlamentar>Masculino</SexoParlamentar><FormaTratamento>Senador </FormaTratamento><UrlFotoParlamentar>http://www.senado.leg.br/senadores/img/fotos-oficiais/senador3396.jpg</UrlFotoParlamentar><UrlPaginaParlamentar>http://www25.senado.leg.br/web/senadores/senador/-/perfil/3396</UrlPaginaParlamentar><UrlPaginaParticular>https://www.senadortasso.com.br/</UrlPaginaParticular><EmailParlamentar>sen.tassojereissati@senado.leg.br</EmailParlamentar><SiglaPartidoParlamentar>PSDB</SiglaPartidoParlamentar><UfParlamentar>CE</UfParlamentar></IdentificacaoParlamentar><Filiacoes><Filiacao><Partido><CodigoPartido>66</CodigoPartido><SiglaPartido>PSDB</SiglaPartido><NomePartido>Partido da Social Democracia Brasileira</NomePartido></Partido><DataFiliacao>2003-02-01</DataFiliacao></Filiacao></Filiacoes><UrlGlossario>http://legis.senado.leg.br/dadosabertos/senador/</UrlGlossario>
+   </Parlamentar>
+</FiliacaoParlamentar>

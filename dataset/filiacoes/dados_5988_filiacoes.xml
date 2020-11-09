@@ -1,0 +1,9 @@
+<?xml version = '1.0' encoding='UTF-8'?>
+<FiliacaoParlamentar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://legis.senado.leg.br/dadosabertos/dados/FiliacaoParlamentarv4.xsd">
+   <Metadados>
+      <Versao>07/11/2020 11:16:13</Versao><VersaoServico>4</VersaoServico><DescricaoDataSet>Filiações partidárias do parlamentar ao longo do(s) mandato(s)</DescricaoDataSet>
+   </Metadados>
+   <Parlamentar>
+      <IdentificacaoParlamentar><CodigoParlamentar>5988</CodigoParlamentar><CodigoPublicoNaLegAtual>854</CodigoPublicoNaLegAtual><NomeParlamentar>Soraya Thronicke</NomeParlamentar><NomeCompletoParlamentar>Soraya Vieira Thronicke</NomeCompletoParlamentar><SexoParlamentar>Feminino</SexoParlamentar><FormaTratamento>Senadora </FormaTratamento><UrlFotoParlamentar>http://www.senado.leg.br/senadores/img/fotos-oficiais/senador5988.jpg</UrlFotoParlamentar><UrlPaginaParlamentar>http://www25.senado.leg.br/web/senadores/senador/-/perfil/5988</UrlPaginaParlamentar><EmailParlamentar>sen.sorayathronicke@senado.leg.br</EmailParlamentar><SiglaPartidoParlamentar>PSL</SiglaPartidoParlamentar><UfParlamentar>MS</UfParlamentar></IdentificacaoParlamentar><Filiacoes><Filiacao><Partido><CodigoPartido>85</CodigoPartido><SiglaPartido>PSL</SiglaPartido><NomePartido>Partido Social Liberal</NomePartido></Partido><DataFiliacao>2019-01-01</DataFiliacao></Filiacao></Filiacoes><UrlGlossario>http://legis.senado.leg.br/dadosabertos/senador/</UrlGlossario>
+   </Parlamentar>
+</FiliacaoParlamentar>

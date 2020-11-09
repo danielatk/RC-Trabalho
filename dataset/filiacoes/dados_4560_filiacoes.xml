@@ -1,0 +1,9 @@
+<?xml version = '1.0' encoding='UTF-8'?>
+<FiliacaoParlamentar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://legis.senado.leg.br/dadosabertos/dados/FiliacaoParlamentarv4.xsd">
+   <Metadados>
+      <Versao>07/11/2020 11:16:13</Versao><VersaoServico>4</VersaoServico><DescricaoDataSet>Filiações partidárias do parlamentar ao longo do(s) mandato(s)</DescricaoDataSet>
+   </Metadados>
+   <Parlamentar>
+      <IdentificacaoParlamentar><CodigoParlamentar>4560</CodigoParlamentar><CodigoPublicoNaLegAtual>850</CodigoPublicoNaLegAtual><NomeParlamentar>Sérgio Petecão</NomeParlamentar><NomeCompletoParlamentar>Sérgio de Oliveira Cunha</NomeCompletoParlamentar><SexoParlamentar>Masculino</SexoParlamentar><FormaTratamento>Senador </FormaTratamento><UrlFotoParlamentar>http://www.senado.leg.br/senadores/img/fotos-oficiais/senador4560.jpg</UrlFotoParlamentar><UrlPaginaParlamentar>http://www25.senado.leg.br/web/senadores/senador/-/perfil/4560</UrlPaginaParlamentar><UrlPaginaParticular>http://www.petecao.com.br/</UrlPaginaParticular><EmailParlamentar>sen.sergiopetecao@senado.leg.br</EmailParlamentar><SiglaPartidoParlamentar>PSD</SiglaPartidoParlamentar><UfParlamentar>AC</UfParlamentar></IdentificacaoParlamentar><Filiacoes><Filiacao><Partido><CodigoPartido>557</CodigoPartido><SiglaPartido>PSD</SiglaPartido><NomePartido>Partido Social Democrático</NomePartido></Partido><DataFiliacao>2011-11-01</DataFiliacao></Filiacao><Filiacao><Partido><CodigoPartido>90</CodigoPartido><SiglaPartido>PMN</SiglaPartido><NomePartido>Partido da Mobilização Nacional</NomePartido></Partido><DataFiliacao>2007-02-01</DataFiliacao><DataDesfiliacao>2011-10-31</DataDesfiliacao></Filiacao></Filiacoes><UrlGlossario>http://legis.senado.leg.br/dadosabertos/senador/</UrlGlossario>
+   </Parlamentar>
+</FiliacaoParlamentar>

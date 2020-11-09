@@ -1,0 +1,9 @@
+<?xml version = '1.0' encoding='UTF-8'?>
+<FiliacaoParlamentar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://legis.senado.leg.br/dadosabertos/dados/FiliacaoParlamentarv4.xsd">
+   <Metadados>
+      <Versao>07/11/2020 11:16:09</Versao><VersaoServico>4</VersaoServico><DescricaoDataSet>Filiações partidárias do parlamentar ao longo do(s) mandato(s)</DescricaoDataSet>
+   </Metadados>
+   <Parlamentar>
+      <IdentificacaoParlamentar><CodigoParlamentar>1186</CodigoParlamentar><CodigoPublicoNaLegAtual>860</CodigoPublicoNaLegAtual><NomeParlamentar>Luis Carlos Heinze</NomeParlamentar><NomeCompletoParlamentar>Luis Carlos Heinze</NomeCompletoParlamentar><SexoParlamentar>Masculino</SexoParlamentar><FormaTratamento>Senador </FormaTratamento><UrlFotoParlamentar>http://www.senado.leg.br/senadores/img/fotos-oficiais/senador1186.jpg</UrlFotoParlamentar><UrlPaginaParlamentar>http://www25.senado.leg.br/web/senadores/senador/-/perfil/1186</UrlPaginaParlamentar><EmailParlamentar>sen.luiscarlosheinze@senado.leg.br</EmailParlamentar><SiglaPartidoParlamentar>PP</SiglaPartidoParlamentar><UfParlamentar>RS</UfParlamentar></IdentificacaoParlamentar><Filiacoes><Filiacao><Partido><CodigoPartido>418</CodigoPartido><SiglaPartido>PP</SiglaPartido><NomePartido>Progressistas</NomePartido></Partido><DataFiliacao>2003-06-02</DataFiliacao></Filiacao><Filiacao><Partido><CodigoPartido>163</CodigoPartido><SiglaPartido>S/Partido</SiglaPartido><NomePartido>Sem Partido</NomePartido></Partido><DataFiliacao>2003-04-03</DataFiliacao><DataDesfiliacao>2003-06-01</DataDesfiliacao></Filiacao></Filiacoes><UrlGlossario>http://legis.senado.leg.br/dadosabertos/senador/</UrlGlossario>
+   </Parlamentar>
+</FiliacaoParlamentar>

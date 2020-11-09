@@ -1,0 +1,9 @@
+<?xml version = '1.0' encoding='UTF-8'?>
+<FiliacaoParlamentar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://legis.senado.leg.br/dadosabertos/dados/FiliacaoParlamentarv4.xsd">
+   <Metadados>
+      <Versao>07/11/2020 11:16:07</Versao><VersaoServico>4</VersaoServico><DescricaoDataSet>Filiações partidárias do parlamentar ao longo do(s) mandato(s)</DescricaoDataSet>
+   </Metadados>
+   <Parlamentar>
+      <IdentificacaoParlamentar><CodigoParlamentar>581</CodigoParlamentar><CodigoPublicoNaLegAtual>833</CodigoPublicoNaLegAtual><NomeParlamentar>Jaques Wagner</NomeParlamentar><NomeCompletoParlamentar>Jaques Wagner</NomeCompletoParlamentar><SexoParlamentar>Masculino</SexoParlamentar><FormaTratamento>Senador </FormaTratamento><UrlFotoParlamentar>http://www.senado.leg.br/senadores/img/fotos-oficiais/senador581.jpg</UrlFotoParlamentar><UrlPaginaParlamentar>http://www25.senado.leg.br/web/senadores/senador/-/perfil/581</UrlPaginaParlamentar><UrlPaginaParticular>https://pt-br.facebook.com/jaqueswagneroficial/</UrlPaginaParticular><EmailParlamentar>sen.jaqueswagner@senado.leg.br</EmailParlamentar><SiglaPartidoParlamentar>PT</SiglaPartidoParlamentar><UfParlamentar>BA</UfParlamentar></IdentificacaoParlamentar><Filiacoes><Filiacao><Partido><CodigoPartido>71</CodigoPartido><SiglaPartido>PT</SiglaPartido><NomePartido>Partido dos Trabalhadores</NomePartido></Partido><DataFiliacao>1999-02-01</DataFiliacao></Filiacao></Filiacoes><UrlGlossario>http://legis.senado.leg.br/dadosabertos/senador/</UrlGlossario>
+   </Parlamentar>
+</FiliacaoParlamentar>
