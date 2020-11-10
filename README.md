@@ -1,4 +1,6 @@
-descrição do trabalho: <br>
+# Trabalho Final de Redes Complexas
+
+Descrição do trabalho: <br>
 Uma rede direcionada, onde o senador X aponta pro senador Y se X votou numa matéria em que o senador Y foi o autor principal, e o peso da aresta é a quantidade de votos. Fazer duas redes. Uma em que as arestas representam voto positivo e outra em que as arestas representam votos negativos. <br>
 Uma outra possibilidade é uma rede não direcionada onde os senadores tão ligados se eles coautoraram uma matéria.
 
