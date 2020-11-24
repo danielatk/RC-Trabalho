@@ -18,3 +18,12 @@ tabelas necessárias: <br>
 -http://legis.senado.leg.br/dadosabertos/senador/22/votacoes <br>
 -http://legis.senado.leg.br/dadosabertos/senador/22/autorias <br>
 -http://legis.senado.leg.br/dadosabertos/senador/partidos <br>
+
+###Referência sugerida pelo prof:
+ - Artigo: Homofilia e Assimetria na Rede de Coautoria de Proposições de Lei do Congresso Brasileiro. Brazilian Workshop on Social Network Analysis and Mining (BraSNAM), 2019 
+ 
+Dicas:
+ - Cuidado com os significados das arestas: precisa ser bem definido 
+ e ter significado
+ - Calcular assortividade em relação ao partido e/ou estado do senador
+ - Noção de coesão
