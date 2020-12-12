@@ -19,9 +19,11 @@ tabelas necessárias: <br>
 -http://legis.senado.leg.br/dadosabertos/senador/22/autorias <br>
 -http://legis.senado.leg.br/dadosabertos/senador/partidos <br>
 
-###Referência sugerida pelo prof:
+
+### Referência sugerida pelo prof:
  - Artigo: Homofilia e Assimetria na Rede de Coautoria de Proposições de Lei do Congresso Brasileiro. Brazilian Workshop on Social Network Analysis and Mining (BraSNAM), 2019 
- 
+([SBC Open Lib](https://sol.sbc.org.br/index.php/brasnam/article/view/6544)) 
+
 Dicas:
  - Cuidado com os significados das arestas: precisa ser bem definido 
  e ter significado

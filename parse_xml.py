@@ -4,6 +4,8 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
+from analises import *
+
 lista_atuais=["4981", "5982", "945", "5967", "5529", "6295", "5936", "5990", "5973", "739", "475", "3830", "5996", "5537", "4994", "5976", "3777", "5718", "5531", "22",\
         "5953", "5540", "4525", "345", "5894", "5008", "5385", "4770", "35", "581", "4545", "4531", "5627", "5895", "5350", "3361", "90", "1249", "5533", "5979", "5926", "1186", "5585", \
         "5557", "5666", "5376", "742", "285", "5422", "5942", "1023", "6027", "5985", "63", "5525", "5924", "5523", "825", "374", "5502", "5012", "5236", "70", "677", "5905", "5732", \
@@ -160,8 +162,8 @@ def make_label_dict(items, keys):
 
 label_dict = make_label_dict(lista_atuais, range(n))
 
-colors_edge_1 = ['b']*n
-colors_edge_2 = ['r']*n
+colors_edge_1 = 'b'
+colors_edge_2 = 'r'
 
 colors_node = []
 
@@ -174,8 +176,106 @@ G2 = nx.from_numpy_matrix(A2)
 nx.draw(G1, node_size=250, labels=label_dict, edge_color=colors_edge_1, node_color=colors_node, with_labels=True)
 plt.show()
 
+f = open("dataInfo/G1_info.txt", "w")
+deg = degree_analysis(G1)
+f.write(f"Grau: "
+        f"\tMínimo: {deg[0]}\n"
+        f"\tMáximo: {deg[1]}\n"
+        f"\tMédia: {deg[2]} +- {deg[3]}\n"
+        f"\tMediana: {deg[4]}\n"
+        f"{deg[5]} (PDF)\n\n")
+
+dist = distance_analysis(G1)
+f.write(f"Distância: ({dist[6]} pares alcançáveis)\n"
+        f"\tMínima: {dist[0]}\n"
+        f"\tMáxima: {dist[1]}\n"
+        f"\tMédia: {dist[2]} +- {dist[3]}\n"
+        f"\tMediana: {dist[4]}\n"
+        f"{dist[5]} (PDF)\n\n")
+
+con = connexity_analysis(G1)
+f.write(f"Componentes conexas: {con[0]} componentes independentes \n"
+        f"\tMínima: {con[1]}\n"
+        f"\tMáxima: {con[2]}\n"
+        f"\tMédia: {con[3]} +- {con[4]}\n"
+        f"\tMediana: {con[5]}\n"
+        f"{con[6]} (PDF)\n\n")
+
+bet = betweenness_analysis(G1)
+f.write(f"Betweenness: \t(Contralidade 1)\n"
+        f"\tMínimo: {bet[0]}\n"
+        f"\tMáximo: {bet[1]}\n"
+        f"\tMédia: {bet[2]} +- {bet[3]}\n"
+        f"\tMediana: {bet[4]}\n"
+        f"{bet[5]} (CCDF)\n\n")
+
+close = closeness_analysis(G1)
+f.write(f"Closeness: \t(Contralidade 2)\n"
+        f"\tMínimo: {close[0]}\n"
+        f"\tMáximo: {close[1]}\n"
+        f"\tMédia: {close[2]} +- {close[3]}\n"
+        f"\tMediana: {close[4]}\n"
+        f"{close[5]} (CCDF)\n\n")
+
+clust = clustering_analysis(G1)
+f.write(f"Clustering: \n"
+        f"\tMínimo: {clust[0]}\n"
+        f"\tMáximo: {clust[1]}\n"
+        f"\tMédia: {clust[2]} +- {clust[3]}\n"
+        f"\tMediana: {clust[4]}\n"
+        f"{clust[5]} (CCDF)\n")
+
 nx.draw(G2, node_size=250, labels=label_dict, edge_color=colors_edge_2, node_color=colors_node, with_labels=True)
 plt.show()
+
+f = open("dataInfo/G2_info.txt", "w")
+deg = degree_analysis(G2)
+f.write(f"Grau: "
+        f"\tMínimo: {deg[0]}\n"
+        f"\tMáximo: {deg[1]}\n"
+        f"\tMédia: {deg[2]} +- {deg[3]}\n"
+        f"\tMediana: {deg[4]}\n"
+        f"{deg[5]} (PDF)\n\n")
+
+dist = distance_analysis(G2)
+f.write(f"Distância: ({dist[6]} pares alcançáveis)\n"
+        f"\tMínima: {dist[0]}\n"
+        f"\tMáxima: {dist[1]}\n"
+        f"\tMédia: {dist[2]} +- {dist[3]}\n"
+        f"\tMediana: {dist[4]}\n"
+        f"{dist[5]} (PDF)\n\n")
+
+con = connexity_analysis(G2)
+f.write(f"Componentes conexas: {con[0]} componentes independentes \n"
+        f"\tMínima: {con[1]}\n"
+        f"\tMáxima: {con[2]}\n"
+        f"\tMédia: {con[3]} +- {con[4]}\n"
+        f"\tMediana: {con[5]}\n"
+        f"{con[6]} (PDF)\n\n")
+
+bet = betweenness_analysis(G2)
+f.write(f"Betweenness: \t(Contralidade 1)\n"
+        f"\tMínimo: {bet[0]}\n"
+        f"\tMáximo: {bet[1]}\n"
+        f"\tMédia: {bet[2]} +- {bet[3]}\n"
+        f"\tMediana: {bet[4]}\n"
+        f"{bet[5]} (CCDF)\n\n")
+
+close = closeness_analysis(G2)
+f.write(f"Closeness: \t(Contralidade 2)\n"
+        f"\tMínimo: {close[0]}\n"
+        f"\tMáximo: {close[1]}\n"
+        f"\tMédia: {close[2]} +- {close[3]}\n"
+        f"\tMediana: {close[4]}\n"
+        f"{close[5]} (CCDF)\n\n")
+
+clust = clustering_analysis(G2)
+f.write(f"Clustering: \n"
+        f"\tMínimo: {clust[0]}\n"
+        f"\tMáximo: {clust[1]}\n"
+        f"\tMédia: {clust[2]} +- {clust[3]}\n"
+        f"\tMediana: {clust[4]}\n"
+        f"{clust[5]} (CCDF)\n")
 
 materias_unicas = []
 parlamentares_materias = []
@@ -221,3 +321,52 @@ G3 = nx.from_numpy_matrix(A3)
 
 nx.draw(G3, node_size=250, labels=label_dict, edge_color=colors_edge_1, with_labels=True)
 plt.show()
+
+f = open("./dataInfo/G3_info.txt", "w")
+deg = degree_analysis(G3)
+f.write(f"Grau: "
+        f"\tMínimo: {deg[0]}\n"
+        f"\tMáximo: {deg[1]}\n"
+        f"\tMédia: {deg[2]} +- {deg[3]}\n"
+        f"\tMediana: {deg[4]}\n"
+        f"{deg[5]} (PDF)\n\n")
+
+dist = distance_analysis(G3)
+f.write(f"Distância: ({dist[6]} pares alcançáveis)\n"
+        f"\tMínima: {dist[0]}\n"
+        f"\tMáxima: {dist[1]}\n"
+        f"\tMédia: {dist[2]} +- {dist[3]}\n"
+        f"\tMediana: {dist[4]}\n"
+        f"{dist[5]} (PDF)\n\n")
+
+con = connexity_analysis(G3)
+f.write(f"Componentes conexas: {con[0]} componentes independentes \n"
+        f"\tMínima: {con[1]}\n"
+        f"\tMáxima: {con[2]}\n"
+        f"\tMédia: {con[3]} +- {con[4]}\n"
+        f"\tMediana: {con[5]}\n"
+        f"{con[6]} (PDF)\n\n")
+
+bet = betweenness_analysis(G3)
+f.write(f"Betweenness: \t(Contralidade 1)\n"
+        f"\tMínimo: {bet[0]}\n"
+        f"\tMáximo: {bet[1]}\n"
+        f"\tMédia: {bet[2]} +- {bet[3]}\n"
+        f"\tMediana: {bet[4]}\n"
+        f"{bet[5]} (CCDF)\n\n")
+
+close = closeness_analysis(G3)
+f.write(f"Closeness: \t(Contralidade 2)\n"
+        f"\tMínimo: {close[0]}\n"
+        f"\tMáximo: {close[1]}\n"
+        f"\tMédia: {close[2]} +- {close[3]}\n"
+        f"\tMediana: {close[4]}\n"
+        f"{close[5]} (CCDF)\n\n")
+
+clust = clustering_analysis(G3)
+f.write(f"Clustering: \n"
+        f"\tMínimo: {clust[0]}\n"
+        f"\tMáximo: {clust[1]}\n"
+        f"\tMédia: {clust[2]} +- {clust[3]}\n"
+        f"\tMediana: {clust[4]}\n"
+        f"{clust[5]} (CCDF)\n")
