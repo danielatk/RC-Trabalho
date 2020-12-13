@@ -43,19 +43,19 @@ colunas_materias = ['CodigoMateria', 'SiglaSubtipoMateria', 'DescricaoSubtipoMat
 partidos_atuais = []
 
 for codigo in lista_atuais:
-    print(codigo)
+    #print(codigo)
     xtree = et.parse("./dataset/atuais/dados_" + codigo + ".xml")
     xroot = xtree.getroot()
     filiacao = xroot[1].find('FiliacaoAtual')
     sigla = xroot[1].find('FiliacaoAtual').find('Partido').find('SiglaPartido').text
     partidos_atuais.append(sigla)
 
-print(partidos_atuais)
+#print(partidos_atuais)
 
 partidos_unicos = list(Counter(partidos_atuais).keys())
 
-print(partidos_unicos)
-print("{} partidos".format(len(partidos_unicos)))
+#print(partidos_unicos)
+#print("{} partidos".format(len(partidos_unicos)))
 
 dic_partidos = {
   'PDT' : 'oposicao',
@@ -85,7 +85,7 @@ dic_cores = {
 materias_votacoes = []
 
 for codigo in lista_atuais:
-    print(codigo)
+    #print(codigo)
     xtree = et.parse("./dataset/votacoes/dados_" + codigo + "_votacoes.xml")
     xroot = xtree.getroot()
     for node in xroot[1][1]:
@@ -104,7 +104,7 @@ materias_comum = []
 parlamentares_comum = []
 
 for codigo in lista_atuais:
-    print(codigo)
+    #print(codigo)
     xtree = et.parse("./dataset/autorias/dados_" + codigo + "_autorias.xml")
     xroot = xtree.getroot()
     for node in xroot[1][1]:
@@ -120,12 +120,12 @@ for codigo in lista_atuais:
             materias_comum.append(cd_materia)
             parlamentares_comum.append(codigo)
 
-print(materias_comum)
-print("qtd materias: ", len(materias_comum))
+#print(materias_comum)
+#print("qtd materias: ", len(materias_comum))
 
-print(parlamentares_comum)
+#print(parlamentares_comum)
 parlamentares_unicos = list(Counter(parlamentares_comum).keys())
-print("qtd parlamentares: ", len(parlamentares_unicos))
+#print("qtd parlamentares: ", len(parlamentares_unicos))
 
 n = len(lista_atuais)
 A1 = np.zeros((n,n))
@@ -151,8 +151,8 @@ for i in range(n):
         elif voto == "Não":
             A2[i,j] += 1
 
-print(A1)
-print(A2)
+#print(A1)
+#print(A2)
 
 def make_label_dict(items, keys):
     label_dict = {}
@@ -175,6 +175,27 @@ G2 = nx.from_numpy_matrix(A2)
 
 nx.draw(G1, node_size=250, labels=label_dict, edge_color=colors_edge_1, node_color=colors_node, with_labels=True)
 plt.show()
+
+# TODO: Otimizar geracao desses dicionarios
+partidos = {i: partidos_atuais[i] for i in range(len(lista_atuais))}
+mapa_partidos = {p:i for i,p in enumerate(dic_partidos.keys())}
+
+#print(G1.nodes)
+nx.set_node_attributes(G1, partidos, name="Partido")
+mixMatrix_partido = nx.attribute_mixing_matrix(G1, "Partido", mapping=mapa_partidos)
+#print("\tMatriz de Mixagem (partidos):", mixMatrix)
+#print(mixMatrix.shape)
+#print(mapa_partidos)
+
+alinhamentos = {i: dic_partidos[partidos_atuais[i]] for i in range(len(lista_atuais))}
+mapa_alinhamentos = {'apoio':0, 'medio':1, 'oposicao':2}
+#print(alinhamentos)
+
+nx.set_node_attributes(G1, alinhamentos, name="Alinhamento")
+mixMatrix_alinhamento = nx.attribute_mixing_matrix(G1, "Alinhamento", mapping=mapa_alinhamentos)
+
+# TODO: Outras métricas de homofilia
+# TODO: Colocar analise de homofilia em uma funcao
 
 f = open("dataInfo/G1_info.txt", "w")
 deg = degree_analysis(G1)
@@ -225,8 +246,24 @@ f.write(f"Clustering: \n"
         f"\tMediana: {clust[4]}\n"
         f"{clust[5]} (CCDF)\n")
 
+f.write(f"Padrão de Mixagem: Afiliação Partidária\n"
+        f"\tAssortatividade (atributo): {nx.attribute_assortativity_coefficient(G1, 'Partido')}\n"
+        f"\tMapeamento: {mapa_partidos}\n"
+        f"\tMatriz:\n"
+        f"{mixMatrix_partido}\n")
+#f"\tAssoratividade (numérico): {nx.numeric_assortativity_coefficient(G1, 'Partido')}\n")
+
+f.write(f"Padrão de Mixagem: Alinhamento (partidário) com o governo\n"
+        f"\tAssortatividade (atributo): {nx.attribute_assortativity_coefficient(G1, 'Alinhamento')}\n"
+        f"\tMapeamento: {mapa_alinhamentos}\n"
+        f"\tMatriz:\n"
+        f"{mixMatrix_alinhamento}\n")
+
+
 nx.draw(G2, node_size=250, labels=label_dict, edge_color=colors_edge_2, node_color=colors_node, with_labels=True)
 plt.show()
+
+# TODO: Analise de homofilia da rede G3
 
 f = open("dataInfo/G2_info.txt", "w")
 deg = degree_analysis(G2)
@@ -277,11 +314,27 @@ f.write(f"Clustering: \n"
         f"\tMediana: {clust[4]}\n"
         f"{clust[5]} (CCDF)\n")
 
+nx.set_node_attributes(G2, partidos, name="Partido")
+mixMatrix_partido = nx.attribute_mixing_matrix(G2, "Partido", mapping=mapa_partidos)
+f.write(f"Padrão de Mixagem: Afiliação Partidária\n"
+        f"\tAssortatividade (atributo): {nx.attribute_assortativity_coefficient(G1, 'Partido')}\n"
+        f"\tMapeamento: {mapa_partidos}\n"
+        f"\tMatriz:\n"
+        f"{mixMatrix_partido}\n")
+
+nx.set_node_attributes(G2, alinhamentos, name="Alinhamento")
+mixMatrix_alinhamento = nx.attribute_mixing_matrix(G2, "Alinhamento", mapping=mapa_alinhamentos)
+f.write(f"Padrão de Mixagem: Alinhamento (partidário) com o governo\n"
+        f"\tAssortatividade (atributo): {nx.attribute_assortativity_coefficient(G1, 'Alinhamento')}\n"
+        f"\tMapeamento: {mapa_alinhamentos}\n"
+        f"\tMatriz:\n"
+        f"{mixMatrix_alinhamento}\n")
+
 materias_unicas = []
 parlamentares_materias = []
 
 for codigo in lista_atuais:
-    print(codigo)
+    #print(codigo)
     xtree = et.parse("./dataset/autorias/dados_" + codigo + "_autorias.xml")
     xroot = xtree.getroot()
     for node in xroot[1][1]:
@@ -302,8 +355,8 @@ for codigo in lista_atuais:
             index = materias_unicas.index(cd_materia)
             parlamentares_materias[index].append(codigo)
 
-print("materias unicas: ", materias_unicas)
-print("parlamentares materias: ", parlamentares_materias)
+#print("materias unicas: ", materias_unicas)
+#print("parlamentares materias: ", parlamentares_materias)
 
 A3 = np.zeros((n,n))
 
@@ -315,7 +368,7 @@ for i in range(len(materias_unicas)):
             A3[origin_index,dest_index] += 1
             A3[dest_index,origin_index] += 1
 
-print(A3)
+#print(A3)
 
 G3 = nx.from_numpy_matrix(A3)
 
