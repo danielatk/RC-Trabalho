@@ -1,0 +1,39 @@
+Descrição Dataframe:
+
+O dataframe principal que será usado pelo site será um dataframe onde cada linha corresponde a um senador. Teremos então os seguintes campos (o nome no dataframe e o path no xml entre parenteses):
+-cod (DetalheParlamentar.Parlamentar.IdentificacaoParlamentar.CodigoParlamentar)
+-cod_pub (DetalheParlamentar.Parlamentar.IdentificacaoParlamentar.CodigoPublicoNaLegAtual)
+-nome (DetalheParlamentar.Parlamentar.IdentificacaoParlamentar.NomeCompletoParlamentar)
+-sexo (DetalheParlamentar.Parlamentar.IdentificacaoParlamentar.SexoParlamentar)
+-tratamento (DetalheParlamentar.Parlamentar.IdentificacaoParlamentar.FormaTratamento)
+-url_foto (DetalheParlamentar.Parlamentar.IdentificacaoParlamentar.UrlFotoParlamentar)
+-url_pag (DetalheParlamentar.Parlamentar.IdentificacaoParlamentar.UrlPaginaParlamentar)
+-email (DetalheParlamentar.Parlamentar.IdentificacaoParlamentar.EmailParlamentar)
+-uf (DetalheParlamentar.Parlamentar.IdentificacaoParlamentar.UfParlamentar)
+-data_nasc (DetalheParlamentar.Parlamentar.DadosBasicosParlamentar.DataNascimento)
+-naturalidade (DetalheParlamentar.Parlamentar.DadosBasicosParlamentar.Naturalidade)
+-uf_naturalidade (DetalheParlamentar.Parlamentar.DadosBasicosParlamentar.UfNaturalidade)
+-endereco (DetalheParlamentar.Parlamentar.DadosBasicosParlamentar.EnderecoParlamentar)
+-telefones (DetalheParlamentar.Parlamentar.Telefones.Telefone.NumeroTelefone)
+-filiacoes (FiliacaoParlamentar.Parlamentar.Filiacoes.Filiacao)
+-votos_favor (VotacaoParlamentar.Parlamentar.Votacoes.Votacao)
+-votos_contra (VotacaoParlamentar.Parlamentar.Votacoes.Votacao)
+
+Teremos também um dataframe de partidos onde esses são os campos:
+-cod (FiliacaoParlamentar.Parlamentar.Filiacoes.Filiacao.Partido.CodigoPartido)
+-sigla (FiliacaoParlamentar.Parlamentar.Filiacoes.Filiacao.Partido.SiglaPartido)
+-nome (FiliacaoParlamentar.Parlamentar.Filiacoes.Filiacao.Partido.NomePartido)
+-alinhamento (groundtruth)
+
+E também um dataframe de matérias onde esses são os campos:
+-cod (MateriasAutoriaParlamentar.Parlamentar.Autorias.Autoria.Materia.IdentificacaoMateria.CodigoMateria)
+-sigla_casa (MateriasAutoriaParlamentar.Parlamentar.Autorias.Autoria.Materia.IdentificacaoMateria.SiglaCasaIdentificacaoMateria)
+-nome_casa (MateriasAutoriaParlamentar.Parlamentar.Autorias.Autoria.Materia.IdentificacaoMateria.NomeCasaIdentificacaoMateria)
+-sigla_subtipo (MateriasAutoriaParlamentar.Parlamentar.Autorias.Autoria.Materia.IdentificacaoMateria.SiglaSubtipoMateria)
+-nome_subtipo (MateriasAutoriaParlamentar.Parlamentar.Autorias.Autoria.Materia.IdentificacaoMateria.DescricaoSubtipoMateria)
+-ano (MateriasAutoriaParlamentar.Parlamentar.Autorias.Autoria.Materia.IdentificacaoMateria.AnoMateria)
+-ind_tramitando (MateriasAutoriaParlamentar.Parlamentar.Autorias.Autoria.Materia.IdentificacaoMateria.IndicadorTramitando)
+-ementa (MateriasAutoriaParlamentar.Parlamentar.Autorias.Autoria.Materia.EmentaMateria)
+-autor_principal (MateriasAutoriaParlamentar.Parlamentar.Autorias.Autoria.IndicadorAutorPrincipal)
+-outros_autores (mesmo xml)
+-data_votacao (VotacaoParlamentar.Parlamentar.Votacoes.Votacao.SessaoPlenaria.DataSecao)
