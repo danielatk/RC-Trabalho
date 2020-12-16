@@ -132,7 +132,7 @@ app.layout = html.Div([
         html.Div(id='hidden-div-alinhamento', children=[
             dcc.Checklist(
                 id='alinhamentos-checklist',
-                options=[{'label': df_partidos.iloc[i]['alinhamento'], 'value': df_partidos.iloc[i]['alinhamento']} for i in range(len(df_partidos['alinhamento'].unique()))]
+                options=[{'label': df_partidos['alinhamento'].unique()[i], 'value': df_partidos['alinhamento'].unique()[i]} for i in range(len(df_partidos['alinhamento'].unique()))]
             )
         ],
         style={'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '100px', 'overflow-y': 'scroll'})
