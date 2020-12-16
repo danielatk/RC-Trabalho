@@ -165,9 +165,8 @@ def filtra_senadores_partido(partidos):
     df_parlamentares = global_store('todos')
     index = len(df_parlamentares) - 1
     while index >= 0:
-        if eval(df_parlamentares.iloc[index]['filiacoes'][0])['cod'] not in partidos:
+        if int(eval(df_parlamentares.iloc[index]['filiacoes'][0])['cod']) not in partidos:
             df_parlamentares = df_parlamentares.drop(df_parlamentares.index[index])
-            index -= 1
         index -= 1
     return df_parlamentares
 
