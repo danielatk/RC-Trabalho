@@ -1,35 +1,35 @@
-,cod,sigla,nome
-0,20,PDT,Acir Marcos Gurgacz
-1,41,CIDADANIA,Alessandro Vieira
-2,577,PODEMOS,Alvaro Fernandes Dias
-3,91,PV,Alvaro Fernandes Dias
-4,66,PSDB,Alvaro Fernandes Dias
-5,557,PSD,Angelo Mario Coronel de Azevedo Martins
-6,418,PP,Ciro Nogueira Lima Filho
-7,22,PFL,Ciro Nogueira Lima Filho
-8,33,MDB,Confúcio Aires Moura
-9,554,DEM,David Samuel Alcolumbre Tobelem
-10,562,PROS,Luis Eduardo Grangeiro Girão
-11,561,SOLIDARIEDADE,Carlos Eduardo Torres Gomes
-12,565,REDE,Eliziane Pereira Gama Melo
-13,72,PTB,Elmano Férrer de Almeida
-14,163,S/Partido,Esperidião Amin Helou Filho
-15,39,PPB,Esperidião Amin Helou Filho
-16,40,PPR,Esperidião Amin Helou Filho
-17,96,PDS,Esperidião Amin Helou Filho
-18,63,PSB,Fernando Bezerra de Souza Coelho
-19,556,PTC,Fernando Affonso Collor de Mello
-20,154,PRTB,Fernando Affonso Collor de Mello
-21,71,PT,Flávio José Arns
-22,521,REPUBLICANOS,Flávio Nantes Bolsonaro
-23,85,PSL,Flávio Nantes Bolsonaro
-24,523,PL,Izalci Lucas Ferreira
-25,579,PATRIOTA,Jorge Kajuru Reis da Costa Nasser
-26,567,PMB,Sergio Olimpio Gomes
-27,458,PSOL,Randolph Frederich Rodrigues Alves
-28,90,PMN,Sérgio de Oliveira Cunha
-29,25,PL,Wellington Antonio Fagundes
-30,149,PHS,Zenaide Maia Calado Pereira dos Santos
-31,88,PSC,José da Cruz Marinho
-32,581,DC,Guaracy Batista da Silveira
-33,156,PSDC,Guaracy Batista da Silveira
+,cod,sigla,nome,alinhamento
+0,20,PDT,Partido Democrático Trabalhista,oposicao
+1,41,CIDADANIA,CIDADANIA,medio
+2,577,PODEMOS,Podemos,medio
+3,91,PV,Partido Verde,medio
+4,66,PSDB,Partido da Social Democracia Brasileira,apoio
+5,557,PSD,Partido Social Democrático,apoio
+6,418,PP,Progressistas,apoio
+7,22,PFL,Partido da Frente Liberal,desconhecido
+8,33,MDB,Movimento Democrático Brasileiro,apoio
+9,554,DEM,Democratas,apoio
+10,562,PROS,Partido Republicano da Ordem Social,medio
+11,561,SOLIDARIEDADE,Solidariedade,medio
+12,565,REDE,Rede Sustentabilidade,oposicao
+13,72,PTB,Partido Trabalhista Brasileiro,apoio
+14,163,S/Partido,Sem Partido,desconhecido
+15,39,PPB,Partido Progressista Brasileiro,desconhecido
+16,40,PPR,Partido Progressista Reformador,desconhecido
+17,96,PDS,Partido Democrático Social,desconhecido
+18,63,PSB,Partido Socialista Brasileiro,oposicao
+19,556,PTC,Partido Trabalhista Cristão,desconhecido
+20,154,PRTB,Partido Renovador Trabalhista Brasileiro,desconhecido
+21,71,PT,Partido dos Trabalhadores,oposicao
+22,521,REPUBLICANOS,REPUBLICANOS,apoio
+23,85,PSL,Partido Social Liberal,apoio
+24,523,PL,Partido Liberal,apoio
+25,579,PATRIOTA,Patriota,apoio
+26,567,PMB,Partido da Mulher Brasileira,desconhecido
+27,458,PSOL,Partido Socialismo e Liberdade,oposicao
+28,90,PMN,Partido da Mobilização Nacional,desconhecido
+29,25,PL,Partido Liberal,apoio
+30,149,PHS,Partido Humanista da Solidariedade,desconhecido
+31,88,PSC,Partido Social Cristão,apoio
+32,581,DC,Democracia Cristã,desconhecido
+33,156,PSDC,Partido Social Democrata Cristão,desconhecido
