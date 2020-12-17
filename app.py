@@ -118,31 +118,42 @@ app.layout = html.Div([
                     options=[{'label': df_parlamentares.iloc[i]['tratamento'] + df_parlamentares.iloc[i]['nome'],\
                     'value': df_parlamentares.iloc[i]['cod']} for i in range(len(df_parlamentares))]
                 )
-            ]),
+            ],
+            style={'height': '150px', 'display': 'inline-block', 'overflow-y': 'scroll'}),
             html.Div([
                 html.Button('Limpar', id='limpar-senadores', disabled=True,  n_clicks=0),
             ])
         ],
-        style={'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px', 'overflow-y': 'scroll'}),
+        style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '200px'}),
 
         html.Div(id='hidden-div-partidos', children=[
-            dcc.Checklist(
-                id='partidos-checklist',
-                options=[{'label': df_partidos.iloc[i]['nome'] + ' (' + df_partidos.iloc[i]['sigla'] + ')',\
+            html.Div([
+                dcc.Checklist(
+                    id='partidos-checklist',
+                    options=[{'label': df_partidos.iloc[i]['nome'] + ' (' + df_partidos.iloc[i]['sigla'] + ')',\
                         'value': df_partidos.iloc[i]['cod']} for i in range(len(df_partidos))]
-            ),
-            html.Button('Limpar', id='limpar-partidos', disabled=True,  n_clicks=0),
+                )
+            ],
+            style={'height': '150px', 'display': 'inline-block', 'overflow-y': 'scroll'}),
+            html.Div([
+                html.Button('Limpar', id='limpar-partidos', disabled=True,  n_clicks=0),
+            ])
         ],
-        style={'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px', 'overflow-y': 'scroll'}),
+        style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '200px'}),
 
-        html.Div(id='hidden-div-alinhamento', children=[
-            dcc.Checklist(
-                id='alinhamentos-checklist',
-                options=[{'label': df_partidos['alinhamento'].unique()[i], 'value': df_partidos['alinhamento'].unique()[i]} for i in range(len(df_partidos['alinhamento'].unique()))]
-            ),
-            html.Button('Limpar', id='limpar-alinhamentos', disabled=True,  n_clicks=0),
+        html.Div(id='hidden-div-alinhamentos', children=[
+            html.Div([
+                dcc.Checklist(
+                    id='alinhamentos-checklist',
+                    options=[{'label': df_partidos['alinhamento'].unique()[i], 'value': df_partidos['alinhamento'].unique()[i]} for i in range(len(df_partidos['alinhamento'].unique()))]
+                )
+            ],
+            style={'height': '150px', 'display': 'inline-block'}),
+            html.Div([
+                html.Button('Limpar', id='limpar-alinhamentos', disabled=True,  n_clicks=0),
+            ])
         ],
-        style={'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px', 'overflow-y': 'scroll'})
+        style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '200px'}),
     ], style={
         'borderBottom': 'thin lightgrey solid',
         'backgroundColor': 'rgb(250, 250, 250)',
@@ -186,27 +197,27 @@ def filtra_senadores_alinhamento(alinhamentos):
     Input('filtro-senadores', 'value'))
 def toggle_custom_senadores(filtro):
     if filtro == 'customizar':
-        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '200px', 'overflow-y': 'scroll'}
+        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '200px'}
     else:
-        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px', 'overflow-y': 'scroll'}
+        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px'}
 
 @app.callback(
     Output('hidden-div-partidos','style'),
     Input('filtro-senadores', 'value'))
 def toggle_custom_partidos(filtro):
     if filtro == 'partido':
-        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '200px', 'overflow-y': 'scroll'}
+        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '200px'}
     else:
-        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px', 'overflow-y': 'scroll'}
+        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px'}
 
 @app.callback(
-    Output('hidden-div-alinhamento','style'),
+    Output('hidden-div-alinhamentos','style'),
     Input('filtro-senadores', 'value'))
 def toggle_custom_alinhamentos(filtro):
     if filtro == 'alinhamento':
-        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '200px', 'overflow-y': 'scroll'}
+        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '200px'}
     else:
-        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px', 'overflow-y': 'scroll'}
+        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px'}
 
 @app.callback(
     Output('botao-gerar-grafo','disabled'),
@@ -237,7 +248,7 @@ def toggle_botao_limpar_partidos(checklist):
     return True
 
 @app.callback(
-    Output('limpar-alinhamento','disabled'),
+    Output('limpar-alinhamentos','disabled'),
     Input('alinhamentos-checklist', 'value'))
 def toggle_botao_limpar_alinhamentos(checklist):
     if checklist is not None and len(checklist) > 0:
