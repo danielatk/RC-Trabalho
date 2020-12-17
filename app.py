@@ -379,7 +379,7 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
         df_parlamentares_filtro = global_store(filtro_senadores)
     parlamentares_filtro, materias = extrai_listas(df_parlamentares_filtro, df_materias_comum)
     A = cria_mat_adj_votos(df_parlamentares_filtro, df_materias_comum, parlamentares_filtro, materias, tipo_rede)
-    if filtrar_senadores is not None and filtrar_senadores[0] == 'filtrar':
+    if filtrar_senadores is not None and len(filtrar_senadores) > 0 and filtrar_senadores[0] == 'filtrar':
         A, parlamentares_filtro = filtra_mat_adj_votos(A, parlamentares_filtro)
         df_parlamentares_filtro = filtra_df_parlamentares(df_parlamentares_filtro, parlamentares_filtro)
     if coloracao_nos == 'ativo':
