@@ -4,12 +4,7 @@
     Funções auxiliares para extração de características de redes
 """
 
-__all__ = ["degree_analysis",
-           "distance_analysis",
-           "connexity_analysis",
-           "betweenness_analysis",
-           "closeness_analysis",
-           "clustering_analysis"]
+__all__ = ["degree_analysis", "distance_analysis", "connexity_analysis", "betweenness_analysis", "closeness_analysis", "clustering_analysis", "pagerank_analysis"]
 
 import networkx as nx
 import numpy as np
@@ -184,3 +179,28 @@ def clustering_analysis(graph):
     desvio = (desvio / n) ** 0.5
 
     return cmin, cmax, media, desvio, mediana, distrCCDF
+
+
+def pagerank_analysis(graph, alpha=0.85):
+    n = graph.number_of_nodes()
+
+    pr = nx.pagerank(graph, alpha=alpha)
+    pr_values = sorted(pr.values())
+
+    prmin = pr_values[0]
+    prmax = pr_values[-1]
+    media = sum(pr_values)/n
+    mediana = pr_values[int(n/2)]
+
+    distrCCDF = [[],[]]
+    desvio = 0
+    for i in range(n):
+        desvio += (pr_values[i] - media) ** 2
+
+        if pr_values[i] in distrCCDF[0]:
+            continue
+        distrCCDF[0] += [pr_values[i]]
+        distrCCDF[1] += [(n-i)/n]
+    desvio = (desvio / n) ** 0.5
+
+    return prmin, prmax, media, desvio, mediana, distrCCDF
