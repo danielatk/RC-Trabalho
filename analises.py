@@ -4,12 +4,17 @@
     Funções auxiliares para extração de características de redes
 """
 
-__all__ = ["degree_analysis", "distance_analysis", "connexity_analysis", "betweenness_analysis", "closeness_analysis", "clustering_analysis", "pagerank_analysis"]
+__all__ = ["degree_analysis",
+           "distance_analysis",
+           "connexity_analysis",
+           "betweenness_analysis",
+           "closeness_analysis",
+           "clustering_analysis",
+           "pagerank_analysis"]
 
 import networkx as nx
 import numpy as np
 import bisect
-
 
 
 def degree_analysis(graph):

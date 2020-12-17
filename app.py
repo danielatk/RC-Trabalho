@@ -17,6 +17,8 @@ import networkx as nx
 import pickle
 import json
 
+from analises import *
+
 external_stylesheets = [
     # Dash CSS
     'https://codepen.io/chriddyp/pen/bWLwgP.css',
@@ -67,20 +69,24 @@ df_parlamentares = limpa_colunas(df_parlamentares, 'votos_contra')
 df_materias_comum = limpa_colunas(df_materias_comum, 'outros_autores')
 
 tipos_rede = [{'label': 'Votos a Favor', 'value': 'favor'}, {'label': 'Votos Contra', 'value': 'contra'}]
-filtros_senadores = [{'label': 'Somente Ativos', 'value': 'ativos'}, {'label': 'Somente Afastados', 'value': 'afastados'},\
-                    {'label': 'Todos', 'value': 'todos'}, {'label': 'Partido', 'value': 'partido'},\
-                    {'label': 'Alinhamento ao Governo', 'value': 'alinhamento'}, {'label': 'Customizar', 'value': 'customizar'}]
+filtros_senadores = [{'label': 'Todos', 'value': 'todos'}, {'label': 'Somente Ativos', 'value': 'ativos'}, \
+                     {'label': 'Somente Afastados', 'value': 'afastados'}, {'label': 'Partido', 'value': 'partido'},\
+                     {'label': 'Alinhamento ao Governo', 'value': 'alinhamento'}, {'label': 'Customizar', 'value': 'customizar'}]
 cores_nos = [{'label': 'Ativo/Afastado', 'value': 'ativo'}, {'label': 'Partido', 'value': 'partido'},\
-            {'label': 'Alinhamento ao Governo', 'value': 'alinhamento'}, {'label': 'Número de Conexões', 'value': 'conexoes'}]
+             {'label': 'Alinhamento ao Governo', 'value': 'alinhamento'}, {'label': 'Número de Conexões', 'value': 'conexoes'}]
+metricas_analise = [{'label': "Nenhuma",                'value': 'analise-nenhuma'},
+                    {'label': "Grau",                   'value': 'analise-grau'},
+                    {'label': "Clusterização Local",    'value': 'analise-cluster'},]
 
 app.layout = html.Div([
     html.Div([
+        html.H1("Redes do Senado Federal Brasileiro"),
 
         html.Div([
             dcc.Dropdown(
                 id='tipo-rede',
                 options=[{'label': tipos_rede[i]['label'], 'value': tipos_rede[i]['value']} for i in range(len(tipos_rede))],
-                value=tipos_rede[0]['value'],
+                value=tipos_rede[0]['value'],   # NOTE: Comentando eu começo sem nenhum selecionado (e da pra ver o nome)
                 placeholder='Tipo de Rede'
             ),
             dcc.Dropdown(
@@ -105,6 +111,12 @@ app.layout = html.Div([
                 id='filtrar-senadores',
                 options=[
                     {'label': 'Mostrar Somente Parlamentares com Conexão', 'value': 'filtrar'},
+                ]
+            ),
+            dcc.Checklist(
+                id='fazer-analise',
+                options=[
+                    {'label': 'Caracterização por métricas', 'value': 'analise'},
                 ]
             ),
             html.Button('Gerar Grafo', id='botao-gerar-grafo', disabled=True,  n_clicks=0),
@@ -154,13 +166,41 @@ app.layout = html.Div([
             ])
         ],
         style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '200px'}),
+
+        html.Div(id='hidden-div-analises', children=[
+            html.Div([
+                dcc.Dropdown(
+                    id='selecao-analise',
+                    options=[{'label': metricas_analise[i]['label'], 'value': metricas_analise[i]['value']} for i in
+                             range(len(metricas_analise))],
+                    value=metricas_analise[0]['value'],
+                    placeholder='Métrica Analisada'
+                )
+            ],
+            style={'width': '49%', 'height': '300px', 'display': 'inline-block', 'overflow-y': 'scroll'}),
+        ],
+        style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '200px', 'backgroundColor': 'rgb(250, 250, 250)'}),
     ], style={
         'borderBottom': 'thin lightgrey solid',
         'backgroundColor': 'rgb(250, 250, 250)',
         'padding': '10px 5px'
     }),
 
-    dcc.Graph(id='graph')
+    dcc.Graph(id='graph'),
+
+    html.Div([
+        html.Div(id='info-metricas', children=[
+            html.H3("Análises da rede"),    # TODO: trocar o título de acordo com a analise?
+
+            html.Div([
+                html.Div(id='minmax'),
+            ]),
+        ], style={'width': '99%', 'float': 'center', 'display': 'none', 'height': '200px'})
+    ], style={
+        'borderTop': 'thin lightgrey solid',
+        'backgroundColor': 'rgb(250, 250, 250)',
+        'padding': '10px 5px'
+    })
 ])
 
 # perform expensive computations in this "global store"
@@ -218,6 +258,25 @@ def toggle_custom_alinhamentos(filtro):
         return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '200px'}
     else:
         return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px'}
+
+@app.callback(
+    Output('hidden-div-analises','style'),
+    Input('fazer-analise', 'value'))
+def toggle_select_metric(filtro):
+    # FIXME: Quando coloco customização de senadores ao mesmo tempo que selecao de metrica o layout fica estranho
+    if filtro is not None and len(filtro) > 0 and filtro[0] == 'analise':
+        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '200px'}
+    else:
+        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px'}
+
+@app.callback(
+    Output('info-metricas','style'),
+    Input('selecao-analise', 'value'))
+def show_analysis(filtro):
+    if filtro == 'analise-nenhuma':
+        return {'width': '99%', 'float': 'center', 'display': 'none', 'height': '200px', 'backgroundColor': 'rgb(250, 250, 250)'}
+    else:
+        return {'width': '90%', 'float': 'center', 'display': 'block', 'height': '200px', 'backgroundColor': 'rgb(250, 250, 250)'}
 
 @app.callback(
     Output('botao-gerar-grafo','disabled'),
@@ -414,19 +473,40 @@ def plotta_grafo(edge_trace, node_trace):
                     )
     return fig
 
+
+def analisar_grafo(graph, metrica):
+    if metrica == 'analise-grau':
+        gmin, gmax, gmed, gdp, gmediana, gdistr = degree_analysis(graph)
+
+        print("Análise de grau")
+        #return [html.P('Mínimo {}\nMáximo {}'.format(gmin, gmax))]
+        return [html.P('Testando para ver se funciona com dois outputs!')]
+
+
+#@app.callback(
+#    Output('minmax', 'children'),
+#    Input('botao-gerar-grafo', 'n_clicks')
+#)
+#def teste(cliques):
+#    return [html.P('Testando para ver se funciona com um output so!')]
+
+
 @app.callback(
-    Output('graph', 'figure'),
-    Input('botao-gerar-grafo', 'n_clicks'),
-    State('tipo-rede', 'value'),
-    State('filtro-senadores', 'value'),
-    State('coloracao-senadores', 'value'),
-    State('filtrar-senadores', 'value'),
-    State('senadores-checklist', 'value'),
-    State('partidos-checklist', 'value'),
-    State('alinhamentos-checklist', 'value'),
-    State('mostrar-por-ano', 'value'))
+    [Output('graph', 'figure'),
+     Output('minmax', 'children')],
+    [Input('botao-gerar-grafo', 'n_clicks')],
+    [State('tipo-rede', 'value'),
+     State('filtro-senadores', 'value'),
+     State('coloracao-senadores', 'value'),
+     State('filtrar-senadores', 'value'),
+     State('senadores-checklist', 'value'),
+     State('partidos-checklist', 'value'),
+     State('alinhamentos-checklist', 'value'),
+     State('mostrar-por-ano', 'value'),
+     State('selecao-analise', 'value')]
+)
 def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtrar_senadores, senadores_checklist,\
-                    partidos_checklist, alinhamentos_checklist, mostrar_por_ano):
+                    partidos_checklist, alinhamentos_checklist, mostrar_por_ano, metrica_analise):
     #if n_cliques == 0:
     #    return
     print("gerando rede")
@@ -446,11 +526,14 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
     if coloracao_nos == 'ativo':
         cores_nos = colore_por_afastamento(df_parlamentares_filtro)
     G = nx.from_numpy_matrix(A)
+    texto_analise = ""
+    if metrica_analise != 'analise-nenhuma':
+        texto_analise, analisar_grafo(G, metrica_analise)
     edge_trace, node_trace = cria_trace(G, df_parlamentares_filtro, cores_nos)
     fig = plotta_grafo(edge_trace, node_trace)
     fig.update_layout(transition_duration=500)
     print('update')
-    return fig
+    return [fig, texto_analise]
 
 @app.callback(
     Output('graph-with-slider', 'figure'),
