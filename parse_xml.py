@@ -1,3 +1,5 @@
+#!/usr/local/bin/python3
+
 import xml.etree.ElementTree as et
 from collections import Counter
 import numpy as np
@@ -244,20 +246,28 @@ f.write(f"Clustering: \n"
         f"\tMáximo: {clust[1]}\n"
         f"\tMédia: {clust[2]} +- {clust[3]}\n"
         f"\tMediana: {clust[4]}\n"
-        f"{clust[5]} (CCDF)\n")
+        f"{clust[5]} (CCDF)\n\n")
+
+pr = pagerank_analysis(G1, 0.5)
+f.write(f"Page Rank: \n"
+        f"\tMínimo: {pr[0]}\n"
+        f"\tMáximo: {pr[1]}\n"
+        f"\tMédia: {pr[2]} +- {pr[3]}\n"
+        f"\tMediana: {pr[4]}\n"
+        f"{pr[5]} (PDF)\n\n")
 
 f.write(f"Padrão de Mixagem: Afiliação Partidária\n"
         f"\tAssortatividade (atributo): {nx.attribute_assortativity_coefficient(G1, 'Partido')}\n"
         f"\tMapeamento: {mapa_partidos}\n"
         f"\tMatriz:\n"
-        f"{mixMatrix_partido}\n")
+        f"{mixMatrix_partido}\n\n")
 #f"\tAssoratividade (numérico): {nx.numeric_assortativity_coefficient(G1, 'Partido')}\n")
 
 f.write(f"Padrão de Mixagem: Alinhamento (partidário) com o governo\n"
         f"\tAssortatividade (atributo): {nx.attribute_assortativity_coefficient(G1, 'Alinhamento')}\n"
         f"\tMapeamento: {mapa_alinhamentos}\n"
         f"\tMatriz:\n"
-        f"{mixMatrix_alinhamento}\n")
+        f"{mixMatrix_alinhamento}\n\n")
 
 
 nx.draw(G2, node_size=250, labels=label_dict, edge_color=colors_edge_2, node_color=colors_node, with_labels=True)
@@ -312,7 +322,15 @@ f.write(f"Clustering: \n"
         f"\tMáximo: {clust[1]}\n"
         f"\tMédia: {clust[2]} +- {clust[3]}\n"
         f"\tMediana: {clust[4]}\n"
-        f"{clust[5]} (CCDF)\n")
+        f"{clust[5]} (CCDF)\n\n")
+
+pr = pagerank_analysis(G2, 0.5)
+f.write(f"Page Rank: \n"
+        f"\tMínimo: {pr[0]}\n"
+        f"\tMáximo: {pr[1]}\n"
+        f"\tMédia: {pr[2]} +- {pr[3]}\n"
+        f"\tMediana: {pr[4]}\n"
+        f"{pr[5]} (PDF)\n\n")
 
 nx.set_node_attributes(G2, partidos, name="Partido")
 mixMatrix_partido = nx.attribute_mixing_matrix(G2, "Partido", mapping=mapa_partidos)
@@ -320,7 +338,7 @@ f.write(f"Padrão de Mixagem: Afiliação Partidária\n"
         f"\tAssortatividade (atributo): {nx.attribute_assortativity_coefficient(G1, 'Partido')}\n"
         f"\tMapeamento: {mapa_partidos}\n"
         f"\tMatriz:\n"
-        f"{mixMatrix_partido}\n")
+        f"{mixMatrix_partido}\n\n")
 
 nx.set_node_attributes(G2, alinhamentos, name="Alinhamento")
 mixMatrix_alinhamento = nx.attribute_mixing_matrix(G2, "Alinhamento", mapping=mapa_alinhamentos)
@@ -328,7 +346,7 @@ f.write(f"Padrão de Mixagem: Alinhamento (partidário) com o governo\n"
         f"\tAssortatividade (atributo): {nx.attribute_assortativity_coefficient(G1, 'Alinhamento')}\n"
         f"\tMapeamento: {mapa_alinhamentos}\n"
         f"\tMatriz:\n"
-        f"{mixMatrix_alinhamento}\n")
+        f"{mixMatrix_alinhamento}\n\n")
 
 materias_unicas = []
 parlamentares_materias = []
@@ -422,4 +440,12 @@ f.write(f"Clustering: \n"
         f"\tMáximo: {clust[1]}\n"
         f"\tMédia: {clust[2]} +- {clust[3]}\n"
         f"\tMediana: {clust[4]}\n"
-        f"{clust[5]} (CCDF)\n")
+        f"{clust[5]} (CCDF)\n\n")
+
+pr = pagerank_analysis(G3, 0.5)
+f.write(f"Page Rank: \n"
+        f"\tMínimo: {pr[0]}\n"
+        f"\tMáximo: {pr[1]}\n"
+        f"\tMédia: {pr[2]} +- {pr[3]}\n"
+        f"\tMediana: {pr[4]}\n"
+        f"{pr[5]} (PDF)\n\n")
