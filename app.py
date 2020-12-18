@@ -480,7 +480,13 @@ def analisar_grafo(graph, metrica):
 
         print("Análise de grau")
         #return [html.P('Mínimo {}\nMáximo {}'.format(gmin, gmax))]
-        return [html.P('Testando para ver se funciona com dois outputs!')]
+        return [html.P('Grau')]
+    elif metrica == 'analise-cluster':
+        #gmin, gmax, gmed, gdp, gmediana, gdistr = degree_analysis(graph)
+
+        print("Análise de clusterização")
+        #return [html.P('Mínimo {}\nMáximo {}'.format(gmin, gmax))]
+        return [html.P('Cluster')]
 
 
 #@app.callback(
@@ -528,7 +534,8 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
     G = nx.from_numpy_matrix(A)
     texto_analise = ""
     if metrica_analise != 'analise-nenhuma':
-        texto_analise, analisar_grafo(G, metrica_analise)
+        texto_analise = analisar_grafo(G, metrica_analise)
+        print("Output da analise: ", texto_analise)
     edge_trace, node_trace = cria_trace(G, df_parlamentares_filtro, cores_nos)
     fig = plotta_grafo(edge_trace, node_trace)
     fig.update_layout(transition_duration=500)
