@@ -190,12 +190,10 @@ app.layout = html.Div([
 
     html.Div([
         html.Div(id='info-metricas', children=[
-            html.H3("Análises da rede"),    # TODO: trocar o título de acordo com a analise?
+            html.H3("Análises da rede"),    # NOTE: trocar o título de acordo com a analise?
 
-            html.Div([
-                html.Div(id='minmax'),
-            ]),
-        ], style={'width': '99%', 'float': 'center', 'display': 'none', 'height': '200px'})
+            html.Div(id='detalhes-analises'),
+        ], style={'width': '99%', 'float': 'center', 'display': 'none', 'height': '400px'})
     ], style={
         'borderTop': 'thin lightgrey solid',
         'backgroundColor': 'rgb(250, 250, 250)',
@@ -274,9 +272,9 @@ def toggle_select_metric(filtro):
     Input('selecao-analise', 'value'))
 def show_analysis(filtro):
     if filtro == 'analise-nenhuma':
-        return {'width': '99%', 'float': 'center', 'display': 'none', 'height': '200px', 'backgroundColor': 'rgb(250, 250, 250)'}
+        return {'width': '99%', 'float': 'center', 'display': 'none', 'height': '400px', 'backgroundColor': 'rgb(250, 250, 250)'}
     else:
-        return {'width': '90%', 'float': 'center', 'display': 'block', 'height': '200px', 'backgroundColor': 'rgb(250, 250, 250)'}
+        return {'width': '90%', 'float': 'center', 'display': 'block', 'height': '400px', 'backgroundColor': 'rgb(250, 250, 250)'}
 
 @app.callback(
     Output('botao-gerar-grafo','disabled'),
@@ -476,11 +474,31 @@ def plotta_grafo(edge_trace, node_trace):
 
 def analisar_grafo(graph, metrica):
     if metrica == 'analise-grau':
+        print("Análise de grau")
         gmin, gmax, gmed, gdp, gmediana, gdistr = degree_analysis(graph)
 
-        print("Análise de grau")
-        #return [html.P('Mínimo {}\nMáximo {}'.format(gmin, gmax))]
-        return [html.P('Grau')]
+        # TODO: Colocar tudo dentro de um div, e o grafico como outro
+        children = []
+
+        textual = [html.H4("Grau dos nós"),
+                   html.P("Mínimo: {}".format(gmin)),
+                   html.P("Máximo: {}".format(gmax)),
+                   html.P("Mediana: {}".format(gmediana)),
+                   html.P("Média: {:.2f}".format(gmed)),
+                   html.P("Desvio Padrão: {:.2f}".format(gdp)),
+                  ]
+        children += [html.Div(textual, style={'width':'40%', 'float':'left', 'display':'inline-block'})]
+
+        fig = go.Figure(
+            data=[go.Scatter(x=gdistr[0], y=gdistr[1])],#, mode="lines")],
+            layout=go.Layout(
+                title=go.layout.Title(text="Função Distribuição de Probabilidade"),
+                height=350
+            )
+        )
+        children += [html.Div([dcc.Graph(figure=fig)], style={'width':'49%', 'display': 'inline-block'})]
+
+        return children
     elif metrica == 'analise-cluster':
         #gmin, gmax, gmed, gdp, gmediana, gdistr = degree_analysis(graph)
 
@@ -499,7 +517,7 @@ def analisar_grafo(graph, metrica):
 
 @app.callback(
     [Output('graph', 'figure'),
-     Output('minmax', 'children')],
+     Output('detalhes-analises', 'children')],
     [Input('botao-gerar-grafo', 'n_clicks')],
     [State('tipo-rede', 'value'),
      State('filtro-senadores', 'value'),
@@ -532,15 +550,14 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
     if coloracao_nos == 'ativo':
         cores_nos = colore_por_afastamento(df_parlamentares_filtro)
     G = nx.from_numpy_matrix(A)
-    texto_analise = ""
+    analise = ""
     if metrica_analise != 'analise-nenhuma':
-        texto_analise = analisar_grafo(G, metrica_analise)
-        print("Output da analise: ", texto_analise)
+        analise = analisar_grafo(G, metrica_analise)
     edge_trace, node_trace = cria_trace(G, df_parlamentares_filtro, cores_nos)
     fig = plotta_grafo(edge_trace, node_trace)
     fig.update_layout(transition_duration=500)
     print('update')
-    return [fig, texto_analise]
+    return [fig, analise]
 
 @app.callback(
     Output('graph-with-slider', 'figure'),
