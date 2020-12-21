@@ -81,7 +81,8 @@ metricas_analise = [{'label': "Nenhuma",                        'value': 'analis
                     {'label': "Clusterização Local",            'value': 'analise-cluster'},
                     {'label': "Centralidade de Betweenness",    'value': 'analise-betwns'},
                     {'label': "Centralidade de Closeness",      'value': 'analise-closns'},
-                    {'label': "Centralidade de PageRank",       'value': 'analise-pgrank'},]
+                    {'label': "Centralidade de PageRank",       'value': 'analise-pgrank'},
+                    {'label': "Homofilia por Assortatividade",  'value': 'analise-assortatividade'},]
 
 app.layout = html.Div([
     html.Div([
@@ -401,12 +402,15 @@ def filtra_df_parlamentares(df_parlamentares, parlamentares_filtro):
 
 def colore_por_afastamento(df_parlamentares):
     colors_node = []
+    colors_dict = {}
     for i in range(len(df_parlamentares)):
         if (df_parlamentares.afastado == "Sim").all():
             colors_node.append('darksalmon')
+            colors_dict[i] = "Afastado"
         else:
             colors_node.append('darkblue')
-    return colors_node
+            colors_dict[i] = "Ativo"
+    return colors_node, colors_dict
 
 def cria_trace(G, df_parlamentares, cores):
     pos = nx.random_layout(G)
@@ -479,7 +483,7 @@ def plotta_grafo(edge_trace, node_trace):
     return fig
 
 
-def analisar_grafo(graph, metrica):
+def analisar_grafo(graph, metrica, atributo=None):
     if metrica == 'analise-nenhuma':
         return []
 
@@ -672,6 +676,38 @@ def analisar_grafo(graph, metrica):
 
         return children
 
+    elif metrica == "analise-assortatividade":
+        print("DEBUG:\tAnálise de Homofilia por assortatividade")
+
+        # TODO: Colocar essas variáveis como constantes externas à função? Ai nao preciso ficar recriando
+        mapeamento = {"Ativo/Afastado": {"Ativo": 0, "Afastado": 1},}
+        descricao = {"Ativo/Afastado": "situação ativa ou em afastamento dos senadores",}
+
+        coef = nx.attribute_assortativity_coefficient(graph, atributo)
+        matriz = nx.attribute_mixing_matrix(graph, atributo, mapping=mapeamento[atributo])
+
+        children = []
+
+        textual = [html.H4("Homofilia por Assortatividade"),
+                   html.P("Análise de assortividade por {}".format(descricao[atributo])),
+                   html.P("Coeficiente de Assortatividade: {:.4f}".format(coef)),]
+        children += [html.Div(textual, style={'width': '40%', 'float': 'left', 'display': 'inline-block'})]
+
+        labels = list(mapeamento[atributo].keys())
+        fig = go.Figure(
+            data=[go.Heatmap(z=matriz, x=labels, y=labels)],
+            layout=go.Layout(
+                title=go.layout.Title(text="Matriz de Mixagem"),
+                height=350
+            )
+        )
+        children += [html.Div([dcc.Graph(figure=fig)], style={'width': '49%', 'display': 'inline-block'})]
+
+        # FIXME: Tem um bug nesse resultado: Mesmo deixando so os senadores com conexao, esta dizendo que tem zero
+        # arestas de afastado para qualquer coisa. Claramente nao pode ser, ja que eles permaneceram no grafo
+
+        return children
+
 
 #@app.callback(
 #    Output('minmax', 'children'),
@@ -713,11 +749,12 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
     if filtrar_senadores is not None and len(filtrar_senadores) > 0 and filtrar_senadores[0] == 'filtrar':
         A, parlamentares_filtro = filtra_mat_adj_votos(A, parlamentares_filtro)
         df_parlamentares_filtro = filtra_df_parlamentares(df_parlamentares_filtro, parlamentares_filtro)
-    if coloracao_nos == 'ativo':
-        cores_nos = colore_por_afastamento(df_parlamentares_filtro)
     G = nx.from_numpy_matrix(A)
-    analise = ""
-    analise = analisar_grafo(G, metrica_analise)
+    if coloracao_nos == 'ativo':
+        cores_nos, atr_dict = colore_por_afastamento(df_parlamentares_filtro)
+        if metrica_analise == 'analise-assortatividade':
+            nx.set_node_attributes(G, atr_dict, name="Ativo/Afastado")
+    analise = analisar_grafo(G, metrica_analise, atributo="Ativo/Afastado")
     edge_trace, node_trace = cria_trace(G, df_parlamentares_filtro, cores_nos)
     fig = plotta_grafo(edge_trace, node_trace)
     fig.update_layout(transition_duration=500)
