@@ -74,9 +74,14 @@ filtros_senadores = [{'label': 'Todos', 'value': 'todos'}, {'label': 'Somente At
                      {'label': 'Alinhamento ao Governo', 'value': 'alinhamento'}, {'label': 'Customizar', 'value': 'customizar'}]
 cores_nos = [{'label': 'Ativo/Afastado', 'value': 'ativo'}, {'label': 'Partido', 'value': 'partido'},\
              {'label': 'Alinhamento ao Governo', 'value': 'alinhamento'}, {'label': 'Número de Conexões', 'value': 'conexoes'}]
-metricas_analise = [{'label': "Nenhuma",                'value': 'analise-nenhuma'},
-                    {'label': "Grau",                   'value': 'analise-grau'},
-                    {'label': "Clusterização Local",    'value': 'analise-cluster'},]
+metricas_analise = [{'label': "Nenhuma",                        'value': 'analise-nenhuma'},
+                    {'label': "Grau",                           'value': 'analise-grau'},
+                    {'label': "Componentes Conexas",            'value': 'analise-connect'},
+                    {'label': "Distância",                      'value': 'analise-dist'},
+                    {'label': "Clusterização Local",            'value': 'analise-cluster'},
+                    {'label': "Centralidade de Betweenness",    'value': 'analise-betwns'},
+                    {'label': "Centralidade de Closeness",      'value': 'analise-closns'},
+                    {'label': "Centralidade de PageRank",       'value': 'analise-pgrank'},]
 
 app.layout = html.Div([
     html.Div([
@@ -177,7 +182,7 @@ app.layout = html.Div([
                     placeholder='Métrica Analisada'
                 )
             ],
-            style={'width': '49%', 'height': '300px', 'display': 'inline-block', 'overflow-y': 'scroll'}),
+            style={'width': '59%', 'height': '300px', 'display': 'inline-block', 'overflow-y': 'scroll'}),
         ],
         style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '200px', 'backgroundColor': 'rgb(250, 250, 250)'}),
     ], style={
@@ -190,12 +195,10 @@ app.layout = html.Div([
 
     html.Div([
         html.Div(id='info-metricas', children=[
-            html.H3("Análises da rede"),    # TODO: trocar o título de acordo com a analise?
+            html.H3("Análises da rede"),    # NOTE: trocar o título de acordo com a analise?
 
-            html.Div([
-                html.Div(id='minmax'),
-            ]),
-        ], style={'width': '99%', 'float': 'center', 'display': 'none', 'height': '200px'})
+            html.Div(id='detalhes-analises'),
+        ], style={'width': '99%', 'float': 'center', 'display': 'none', 'height': '400px'})
     ], style={
         'borderTop': 'thin lightgrey solid',
         'backgroundColor': 'rgb(250, 250, 250)',
@@ -260,23 +263,25 @@ def toggle_custom_alinhamentos(filtro):
         return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px'}
 
 @app.callback(
-    Output('hidden-div-analises','style'),
-    Input('fazer-analise', 'value'))
+    [Output('hidden-div-analises','style'),
+     Output('selecao-analise', 'value')],
+    [Input('fazer-analise', 'value')])
 def toggle_select_metric(filtro):
     # FIXME: Quando coloco customização de senadores ao mesmo tempo que selecao de metrica o layout fica estranho
     if filtro is not None and len(filtro) > 0 and filtro[0] == 'analise':
-        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '200px'}
+        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '200px'}, \
+               'analise-nenhuma'
     else:
-        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px'}
+        return {'width': '49%', 'float': 'right', 'display': 'none', 'height': '200px'}, 'analise-nenhuma'
 
 @app.callback(
     Output('info-metricas','style'),
     Input('selecao-analise', 'value'))
 def show_analysis(filtro):
     if filtro == 'analise-nenhuma':
-        return {'width': '99%', 'float': 'center', 'display': 'none', 'height': '200px', 'backgroundColor': 'rgb(250, 250, 250)'}
+        return {'width': '99%', 'float': 'center', 'display': 'none', 'height': '400px', 'backgroundColor': 'rgb(250, 250, 250)'}
     else:
-        return {'width': '90%', 'float': 'center', 'display': 'block', 'height': '200px', 'backgroundColor': 'rgb(250, 250, 250)'}
+        return {'width': '90%', 'float': 'center', 'display': 'block', 'height': '400px', 'backgroundColor': 'rgb(250, 250, 250)'}
 
 @app.callback(
     Output('botao-gerar-grafo','disabled'),
@@ -475,12 +480,197 @@ def plotta_grafo(edge_trace, node_trace):
 
 
 def analisar_grafo(graph, metrica):
-    if metrica == 'analise-grau':
+    if metrica == 'analise-nenhuma':
+        return []
+
+    elif metrica == 'analise-grau':
+        print("DEBUG:\tAnálise de grau")    # TODO: adicionar log! (com 'import logging')
         gmin, gmax, gmed, gdp, gmediana, gdistr = degree_analysis(graph)
 
-        print("Análise de grau")
-        #return [html.P('Mínimo {}\nMáximo {}'.format(gmin, gmax))]
-        return [html.P('Testando para ver se funciona com dois outputs!')]
+        children = []
+
+        textual = [html.H4("Grau dos nós"),
+                   html.P("Mínimo: {}".format(gmin)),
+                   html.P("Máximo: {}".format(gmax)),
+                   html.P("Mediana: {}".format(gmediana)),
+                   html.P("Média: {:.2f}".format(gmed)),
+                   html.P("Desvio Padrão: {:.2f}".format(gdp)),
+                  ]
+        children += [html.Div(textual, style={'width':'40%', 'float':'left', 'display':'inline-block'})]
+
+        fig = go.Figure(
+            data=[go.Scatter(x=gdistr[0], y=gdistr[1], mode="lines+markers",
+                             marker_color="rgba(0, 0, 0, .7)", line_color="rgba(0, 0, 255, 0.6)")],
+            layout=go.Layout(
+                title=go.layout.Title(text="Função Distribuição de Probabilidade"),
+                height=350
+            )
+        )
+        children += [html.Div([dcc.Graph(figure=fig)], style={'width':'49%', 'display': 'inline-block'})]
+
+        return children
+
+    elif metrica == 'analise-cluster':
+        clmin, clmax, clmed, cldp, clmediana, cldistr = clustering_analysis(graph)
+        print("DEBUG:\tAnálise de clusterização")
+
+        children = []
+
+        textual = [html.H4("Clusterização local dos nós"),
+                   html.P("Mínimo: {:.3f}".format(clmin)),
+                   html.P("Máximo: {:.3f}".format(clmax)),
+                   html.P("Mediana: {:.3f}".format(clmediana)),
+                   html.P("Média: {:.3f}".format(clmed)),
+                   html.P("Desvio Padrão: {:.3f}".format(cldp)),
+                   ]
+        children += [html.Div(textual, style={'width': '40%', 'float': 'left', 'display': 'inline-block'})]
+
+        fig = go.Figure(
+            data=[go.Scatter(x=cldistr[0], y=cldistr[1], mode="lines")],
+            layout=go.Layout(
+                title=go.layout.Title(text="Função de Distribuição Cumulativa Complementar"),
+                height=350
+            )
+        )
+        children += [html.Div([dcc.Graph(figure=fig)], style={'width': '49%', 'display': 'inline-block'})]
+
+        return children
+
+    elif metrica == "analise-connect":
+        cn_n, cnmin, cnmax, cnmed, cndp, cnmediana, cndistr = connexity_analysis(graph)
+        print("DEBUG:\tAnálise das componentes conexas")
+
+        children = []
+
+        textual = [html.H4("Tamanhos das componentes conexas"),
+                   html.P("Mínimo: {}".format(cnmin)),
+                   html.P("Máximo: {}".format(cnmax)),
+                   html.P("Mediana: {}".format(cnmediana)),
+                   html.P("Média: {:.2f}".format(cnmed)),
+                   html.P("Desvio Padrão: {:.2f}".format(cndp)),
+                   html.H4("Total de {} componentes".format(cn_n)),
+                   ]
+        children += [html.Div(textual, style={'width': '40%', 'float': 'left', 'display': 'inline-block'})]
+
+        fig = go.Figure(
+            data=[go.Scatter(x=cndistr[0], y=cndistr[1], mode="lines+markers",
+                             marker_color="rgba(0, 0, 0, .7)", line_color="rgba(0, 0, 255, 0.6)")],
+            layout=go.Layout(
+                title=go.layout.Title(text="Função Distribuição de Probabilidade"),
+                height=350
+            )
+        )
+        children += [html.Div([dcc.Graph(figure=fig)], style={'width': '49%', 'display': 'inline-block'})]
+
+        return children
+
+    elif metrica == "analise-dist":
+        dmin, dmax, dmed, ddp, dmediana, ddistr, d_n = distance_analysis(graph)
+        print("DEBUG:\tAnálise de distância")
+
+        children = []
+
+        textual = [html.H4("Distâncias entre os nós"),
+                   html.P("Mínimo: {}".format(dmin)),
+                   html.P("Máximo: {}".format(dmax)),
+                   html.P("Mediana: {}".format(dmediana)),
+                   html.P("Média: {:.2f}".format(dmed)),
+                   html.P("Desvio Padrão: {:.2f}".format(ddp)),
+                   html.H4("Total de {} pares de vértices".format(d_n)),
+                   html.P("Observação: são considerados apenas os pares de vértices conectados entre si"),
+                   ]
+        children += [html.Div(textual, style={'width': '40%', 'float': 'left', 'display': 'inline-block'})]
+
+        fig = go.Figure(
+            data=[go.Scatter(x=ddistr[0], y=ddistr[1], mode="lines+markers",
+                             marker_color="rgba(0, 0, 0, .7)", line_color="rgba(0, 0, 255, 0.6)")],
+            layout=go.Layout(
+                title=go.layout.Title(text="Função Distribuição de Probabilidade"),
+                height=350
+            )
+        )
+        children += [html.Div([dcc.Graph(figure=fig)], style={'width': '49%', 'display': 'inline-block'})]
+
+        return children
+
+    elif metrica == "analise-betwns":
+        btwnmin, btwnmax, btwnmed, btwndp, btwnmediana, btwndistr = betweenness_analysis(graph)
+        print("DEBUG:\tAnálise de betweenness")
+
+        children = []
+
+        textual = [html.H4("Centralidade dos nós por Betweenness"),
+                   html.P("Mínimo: {:.4f}".format(btwnmin)),
+                   html.P("Máximo: {:.4f}".format(btwnmax)),
+                   html.P("Mediana: {:.4f}".format(btwnmediana)),
+                   html.P("Média: {:.4f}".format(btwnmed)),
+                   html.P("Desvio Padrão: {:.4f}".format(btwndp)),
+                   ]
+        children += [html.Div(textual, style={'width': '40%', 'float': 'left', 'display': 'inline-block'})]
+
+        fig = go.Figure(
+            data=[go.Scatter(x=btwndistr[0], y=btwndistr[1], mode="lines")],
+            layout=go.Layout(
+                title=go.layout.Title(text="Função de Distribuição Cumulativa Complementar"),
+                height=350
+            )
+        )
+        children += [html.Div([dcc.Graph(figure=fig)], style={'width': '49%', 'display': 'inline-block'})]
+
+        return children
+
+    elif metrica == "analise-closns":
+        closemin, closemax, closemed, closedp, closemediana, closedistr = closeness_analysis(graph)
+        print("DEBUG:\tAnálise de closeness")
+
+        children = []
+
+        textual = [html.H4("Centralidade dos nós por Closeness"),
+                   html.P("Mínimo: {:.3f}".format(closemin)),
+                   html.P("Máximo: {:.3f}".format(closemax)),
+                   html.P("Mediana: {:.3f}".format(closemediana)),
+                   html.P("Média: {:.3f}".format(closemed)),
+                   html.P("Desvio Padrão: {:.3f}".format(closedp)),
+                   ]
+        children += [html.Div(textual, style={'width': '40%', 'float': 'left', 'display': 'inline-block'})]
+
+        fig = go.Figure(
+            data=[go.Scatter(x=closedistr[0], y=closedistr[1], mode="lines")],
+            layout=go.Layout(
+                title=go.layout.Title(text="Função de Distribuição Cumulativa Complementar"),
+                height=350
+            )
+        )
+        children += [html.Div([dcc.Graph(figure=fig)], style={'width': '49%', 'display': 'inline-block'})]
+
+        return children
+
+    elif metrica == "analise-pgrank":
+        pgrkmin, pgrkmax, pgrkmed, pgrkdp, pgrkmediana, pgrkdistr = pagerank_analysis(graph)
+        print("DEBUG:\tAnálise de PageRank (alfa=0.85)")
+        # TODO: Permitir mudança do alfa
+
+        children = []
+
+        textual = [html.H4("Centralidade dos nós por PageRank (0,85)"),
+                   html.P("Mínimo: {:.4f}".format(pgrkmin)),
+                   html.P("Máximo: {:.4f}".format(pgrkmax)),
+                   html.P("Mediana: {:.4f}".format(pgrkmediana)),
+                   html.P("Média: {:.4f}".format(pgrkmed)),
+                   html.P("Desvio Padrão: {:.4f}".format(pgrkdp)),
+                   ]
+        children += [html.Div(textual, style={'width': '40%', 'float': 'left', 'display': 'inline-block'})]
+
+        fig = go.Figure(
+            data=[go.Scatter(x=pgrkdistr[0], y=pgrkdistr[1], mode="lines")],
+            layout=go.Layout(
+                title=go.layout.Title(text="Função de Distribuição Cumulativa Complementar"),
+                height=350
+            )
+        )
+        children += [html.Div([dcc.Graph(figure=fig)], style={'width': '49%', 'display': 'inline-block'})]
+
+        return children
 
 
 #@app.callback(
@@ -493,7 +683,7 @@ def analisar_grafo(graph, metrica):
 
 @app.callback(
     [Output('graph', 'figure'),
-     Output('minmax', 'children')],
+     Output('detalhes-analises', 'children')],
     [Input('botao-gerar-grafo', 'n_clicks')],
     [State('tipo-rede', 'value'),
      State('filtro-senadores', 'value'),
@@ -526,14 +716,13 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
     if coloracao_nos == 'ativo':
         cores_nos = colore_por_afastamento(df_parlamentares_filtro)
     G = nx.from_numpy_matrix(A)
-    texto_analise = ""
-    if metrica_analise != 'analise-nenhuma':
-        texto_analise, analisar_grafo(G, metrica_analise)
+    analise = ""
+    analise = analisar_grafo(G, metrica_analise)
     edge_trace, node_trace = cria_trace(G, df_parlamentares_filtro, cores_nos)
     fig = plotta_grafo(edge_trace, node_trace)
     fig.update_layout(transition_duration=500)
     print('update')
-    return [fig, texto_analise]
+    return [fig, analise]
 
 @app.callback(
     Output('graph-with-slider', 'figure'),
