@@ -413,7 +413,7 @@ def colore_por_afastamento(df_parlamentares):
     return colors_node, colors_dict
 
 def cria_trace(G, df_parlamentares, cores):
-    pos = nx.random_layout(G)
+    pos = nx.circular_layout(G) #nx.random_layout(G)
     edge_x = []
     edge_y = []
     for edge in G.edges():
@@ -754,6 +754,7 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
         cores_nos, atr_dict = colore_por_afastamento(df_parlamentares_filtro)
         if metrica_analise == 'analise-assortatividade':
             nx.set_node_attributes(G, atr_dict, name="Ativo/Afastado")
+            # FIXME: Tem algo de errado ou com a coloração ou com a definição dos atributos dos nós
     analise = analisar_grafo(G, metrica_analise, atributo="Ativo/Afastado")
     edge_trace, node_trace = cria_trace(G, df_parlamentares_filtro, cores_nos)
     fig = plotta_grafo(edge_trace, node_trace)
