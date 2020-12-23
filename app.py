@@ -133,8 +133,11 @@ app.layout = html.Div([
             html.Div([
                 dcc.Checklist(
                     id='senadores-checklist',
-                    options=[{'label': df_parlamentares.iloc[i]['tratamento'] + df_parlamentares.iloc[i]['nome'],\
-                    'value': df_parlamentares.iloc[i]['cod']} for i in range(len(df_parlamentares))]
+                    options=[
+                        {'label': df_parlamentares.iloc[i]['tratamento'] + df_parlamentares.iloc[i]['nome'] + '\n',
+                         'value': df_parlamentares.iloc[i]['cod']} for i in range(len(df_parlamentares))
+                    ],
+                    labelStyle={'display': 'block'}
                 )
             ],
             style={'height': '150px', 'display': 'inline-block', 'overflow-y': 'scroll'}),
@@ -404,11 +407,11 @@ def colore_por_afastamento(df_parlamentares):
     colors_node = []
     colors_dict = {}
     for i in range(len(df_parlamentares)):
-        if (df_parlamentares.afastado == "Sim").all():
-            colors_node.append('darksalmon')
+        if df_parlamentares.iloc[i].afastado == 'Sim': #(df_parlamentares.afastado == "Sim").all():
+            colors_node.append('red')       # darksalmon
             colors_dict[i] = "Afastado"
         else:
-            colors_node.append('darkblue')
+            colors_node.append('green')     # darkblue
             colors_dict[i] = "Ativo"
     return colors_node, colors_dict
 
@@ -447,6 +450,9 @@ def cria_trace(G, df_parlamentares, cores):
             color=cores,
             size=10,
             line_width=2))
+    # TODO: Acho que para colocar legenda o ideal é a gente separar em dois traces...
+    # Ou adicionar como atributo de alguma forma e colocar agrupado assim
+    # https://plotly.com/python/legend/
 
     node_adjacencies = []
     node_text = []
@@ -458,9 +464,12 @@ def cria_trace(G, df_parlamentares, cores):
         node_text.append(str(df_parlamentares.iloc[node].tratamento) + \
                         str(df_parlamentares.iloc[node].nome) )
         if pd.isnull(df_parlamentares.iloc[node].email) == False:
-            node_text[-1] = node_text[-1] + '<br>email: ' + str(df_parlamentares.iloc[node].email)
+            node_text[-1] = node_text[-1] + \
+                            '<br>e-mail: ' + str(df_parlamentares.iloc[node].email)# + \
+                            #'<br>UF: ' + str(df_parlamentares.iloc[node].uf)
+            # FIXME: O csv dos parlamentares nao tem partido!!!
 
-    node_trace.marker.color = node_adjacencies
+    #node_trace.marker.color = node_adjacencies
     node_trace.text = node_text
 
     return edge_trace, node_trace
@@ -751,12 +760,11 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
         df_parlamentares_filtro = filtra_df_parlamentares(df_parlamentares_filtro, parlamentares_filtro)
     G = nx.from_numpy_matrix(A)
     if coloracao_nos == 'ativo':
-        cores_nos, atr_dict = colore_por_afastamento(df_parlamentares_filtro)
+        cores_dos_nos, atr_dict = colore_por_afastamento(df_parlamentares_filtro)
         if metrica_analise == 'analise-assortatividade':
             nx.set_node_attributes(G, atr_dict, name="Ativo/Afastado")
-            # FIXME: Tem algo de errado ou com a coloração ou com a definição dos atributos dos nós
     analise = analisar_grafo(G, metrica_analise, atributo="Ativo/Afastado")
-    edge_trace, node_trace = cria_trace(G, df_parlamentares_filtro, cores_nos)
+    edge_trace, node_trace = cria_trace(G, df_parlamentares_filtro, cores_dos_nos)
     fig = plotta_grafo(edge_trace, node_trace)
     fig.update_layout(transition_duration=500)
     print('update')
