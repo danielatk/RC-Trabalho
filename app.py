@@ -85,10 +85,10 @@ metricas_analise = [{'label': "Nenhuma",                        'value': 'analis
                     {'label': "Homofilia por Assortatividade",  'value': 'analise-assortatividade'},]
 mostrar_tempo = [{'label': 'Nenhum', 'value':'tempo-todos'},
                  {'label': 'Mostrar por ano', 'value':'tempo-ano'},
-                 {'label': 'Mostrar por período Eleitoral', 'value':'tempo-periodo'}]
+                 {'label': 'Mostrar por mandato eleitoral', 'value':'tempo-mandato'}]
 anos = [{'label':str(i), 'value':i} for i in range(1991,2021)]
-periodos_eleitorais = [{'label':'{} - {}'.format(i, i+3), 'value':i} for i in range(1991,2021,4)]
-#[{'label': 'Todos', 'value':'periodo-todos'}]
+mandatos_eleitorais = [{'label':'{} - {}'.format(i, i+3), 'value':i} for i in range(1991,2021,4)]
+#[{'label': 'Todos', 'value':'mandato-todos'}]
 
 app.layout = html.Div([
     html.Div([
@@ -150,14 +150,14 @@ app.layout = html.Div([
         ],
         style={'width': '49%', 'float': 'right', 'display': 'none', 'backgroundColor': 'rgb(250, 250, 250)'}),
 
-        html.Div(id='hidden-div-periodo', children=[
+        html.Div(id='hidden-div-mandato', children=[
             html.Div([
                 dcc.Dropdown(
-                    id='selecao-periodo',
-                    options=[{'label': periodos_eleitorais[i]['label'], 'value': periodos_eleitorais[i]['value']}
-                             for i in range(len(periodos_eleitorais))],
-                    value=periodos_eleitorais[-1]['value'],
-                    placeholder='Período Eleitoral'
+                    id='selecao-mandato',
+                    options=[{'label': mandatos_eleitorais[i]['label'], 'value': mandatos_eleitorais[i]['value']}
+                             for i in range(len(mandatos_eleitorais))],
+                    value=mandatos_eleitorais[-1]['value'],
+                    placeholder='Mandato Eleitoral'
                 )
             ],style={'width': '59%', 'height': '300px', 'display': 'inline-block', 'overflow-y': 'scroll'}),
         ],
@@ -314,14 +314,14 @@ def toggle_select_metric(filtro):
 
 @app.callback(
     [Output('hidden-div-ano','style'),
-     Output('hidden-div-periodo','style')],
+     Output('hidden-div-mandato','style')],
     [Input('filtrar-tempo', 'value')]
 )
 def toggle_custom_time(filtro):
     if filtro == 'tempo-ano':
         return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '10px'}, \
                {'width': '49%', 'float': 'right', 'display': 'none'}
-    elif filtro == 'tempo-periodo':
+    elif filtro == 'tempo-mandato':
         return {'width': '49%', 'float': 'right', 'display': 'none'}, \
                {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '10px'}
     else:
@@ -549,7 +549,7 @@ def filtrar_por_ano(df_info, ano):
     ret = df_ano['cod'].tolist()
     return ret
 
-def filtrar_por_periodo(df_info, ano):
+def filtrar_por_mandato(df_info, ano):
     df_ano = df_info.loc[(df_info['ano_votacao'] >= ano) & (df_info['ano_votacao'] <= ano+3)]
     ret = df_ano['cod'].tolist()
     return ret
@@ -795,11 +795,11 @@ def analisar_grafo(graph, metrica, atributo=None):
      State('alinhamentos-checklist', 'value'),
      State('filtrar-tempo', 'value'),
      State('selecao-ano', 'value'),
-     State('selecao-periodo', 'value'),
+     State('selecao-mandato', 'value'),
      State('selecao-analise', 'value'),]
 )
 def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtrar_senadores, senadores_checklist,\
-                   partidos_checklist, alinhamentos_checklist, filtrar_tempo, filtro_ano, filtro_periodo,\
+                   partidos_checklist, alinhamentos_checklist, filtrar_tempo, filtro_ano, filtro_mandato,\
                    metrica_analise):
     #if n_cliques == 0:
     #    return
@@ -818,8 +818,8 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
     # TODO: A extracao das materias nao esta generalizada para o outro tipo de rede
     if filtrar_tempo == 'tempo-ano':
         materias = filtrar_por_ano(df_materias_comum, filtro_ano)
-    elif filtrar_tempo == 'tempo-periodo':
-        materias = filtrar_por_periodo(df_materias_comum, filtro_periodo)
+    elif filtrar_tempo == 'tempo-mandato':
+        materias = filtrar_por_mandato(df_materias_comum, filtro_mandato)
 
     A = cria_mat_adj_votos(df_parlamentares_filtro, df_materias_comum, parlamentares_filtro, materias, tipo_rede)
     if filtrar_senadores is not None and len(filtrar_senadores) > 0 and filtrar_senadores[0] == 'filtrar':
