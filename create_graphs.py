@@ -12,6 +12,9 @@ df_materias = pd.read_csv('./dataset/csvs/materias.csv')
 df_materias_comum = pd.read_csv('./dataset/csvs/materias_comum.csv')
 df_parlamentares = pd.read_csv('./dataset/csvs/parlamentares.csv')
 
+print(df_materias.columns)
+print(df_parlamentares.columns)
+
 def clean_alt_list(list_):
     list_ = list_.replace(', ', '","')
     list_ = list_.replace('[', '["')
@@ -37,6 +40,56 @@ def extrai_listas(df_parlamentares, df_materias_comum):
     parlamentares = df_parlamentares['cod'].tolist()
     materias = df_materias_comum['cod'].tolist()
     return parlamentares, materias
+
+#-------------------COMEÇA SEÇÃO DE GRAFO BIPARTIDO--------------------
+
+def cria_grafo_bipartido(df_parlamentares, df_materias, parlamentares, materias, tipo_voto):
+    if tipo_voto == 'favor-bipartido':
+        tipo_voto = 'votos_favor'
+    elif tipo_voto == 'contra-bipartido':
+        tipo_voto = 'votos_contra'
+    else:
+        print("tipo de voto não existe")
+        return
+    n = len(df_parlamentares)
+    m = len(df_materias)
+    A = np.zeros((n,m))
+    G = nx.Graph()
+    G.add_nodes_from(parlamentares, bipartite=0)
+    G.add_nodes_from(materias, bipartite=1)
+    for i in range(len(parlamentares)):
+        votos = df_parlamentares.iloc[i][tipo_voto]
+        for materia in votos:
+            materia = materia.replace('\'', '')
+            if materia == '':
+                continue
+            materia = int(materia)
+
+            if materia not in materias:
+                continue
+            index_materia = materias.index(materia)
+            G.add_edges_from([(i, index_materia)])
+    return G
+
+G = cria_grafo_bipartido(df_parlamentares, df_materias, df_parlamentares['cod'].tolist(), df_materias['cod'].tolist(), 'favor-bipartido')
+# Separate by group
+u = []
+print(nx.get_node_attributes(G,'bipartite'))
+for key in nx.get_node_attributes(G,'bipartite'):
+    if nx.get_node_attributes(G,'bipartite')[key] == 0:
+        u.append(key)
+#u = [n for n in G.nodes if nx.get_node_attributes(G,'bipartite')[n] == 0]
+l, r = nx.bipartite.sets(G, top_nodes=u)
+pos = {}
+
+# Update position for node from each group
+pos.update((node, (1, index)) for index, node in enumerate(l))
+pos.update((node, (2, index)) for index, node in enumerate(r))
+
+nx.draw(G, pos=pos)
+plt.show()
+
+#---------------------TERMINA SEÇÃO DE GRAFO BIPARTIDO--------------------
 
 def cria_mat_adj_votos(df_parlamentares, df_materias_comum, parlamentares, materias, tipo_voto='votos_favor'):
     n = len(df_parlamentares)
