@@ -1054,8 +1054,9 @@ def cria_pos_bipartido(G):
     pos = {}
 
     # Update position for node from each group
-    pos.update((node, (1, index)) for index, node in enumerate(l))
-    pos.update((node, (2, index)) for index, node in enumerate(r))
+    # TODO: Melhorar posicionamento. Podemos espaçar e centralizar
+    pos.update((node, (index, 2)) for index, node in enumerate(l))
+    pos.update((node, (index, 1)) for index, node in enumerate(r))
 
     return pos
 
@@ -1118,7 +1119,7 @@ def plotta_grafo(edge_trace, node_trace):
                     #    showarrow=False,
                     #    xref="paper", yref="paper",
                     #    x=0.005, y=-0.002 ) ],
-                    height=800,
+                    height=750,
                     xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
                     yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
                     )
@@ -1136,7 +1137,7 @@ def plotta_grafo_bipartido(edge_trace, node_trace_senadores, node_trace_materias
                     #    showarrow=False,
                     #    xref="paper", yref="paper",
                     #    x=0.005, y=-0.002 ) ],
-                    height=500,
+                    height=750,
                     xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
                     yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
                     )
@@ -1207,6 +1208,14 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
             materias = filtrar_por_mandato(df_materias, filtro_mandato)
 
         G = cria_grafo_bipartido(df_parlamentares_filtro, df_materias, parlamentares_filtro, materias, tipo_rede)
+
+        # FIXME: Nao funcionou o filtro de conexoes apenas copiando. Verificar erro
+        #if filtrar_senadores is not None and len(filtrar_senadores) > 0 and filtrar_senadores[0] == 'filtrar':
+        #    A = nx.adjacency_matrix(G)
+        #    A, parlamentares_filtro = filtra_#mat_adj_votos(A, parlamentares_filtro)
+        #    df_parlamentares_filtro = filtra_df_parlamentares(df_parlamentares_filtro, parlamentares_filtro)
+        #    G = nx.from_numpy_matrix(A)
+
         pos = cria_pos_bipartido(G)
         edge_trace, node_trace_senadores, node_trace_materias = cria_trace_bipartido(G, df_parlamentares_filtro, df_materias, pos, coloracao_nos)
         fig = plotta_grafo_bipartido(edge_trace, node_trace_senadores, node_trace_materias)
