@@ -1174,11 +1174,10 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
     
     if tipo_rede == 'favor' or tipo_rede == 'contra':
         # Filtro temportal
-        # TODO: A extracao das materias nao esta generalizada para o outro tipo de rede
         if filtrar_tempo == 'tempo-ano':
-            materias = filtrar_por_ano(df_materias_comum, filtro_ano)
+            materias_comum = filtrar_por_ano(df_materias_comum, filtro_ano)
         elif filtrar_tempo == 'tempo-mandato':
-            materias = filtrar_por_mandato(df_materias_comum, filtro_mandato)
+            materias_comum = filtrar_por_mandato(df_materias_comum, filtro_mandato)
         
         A = cria_mat_adj_votos(df_parlamentares_filtro, df_materias_comum, parlamentares_filtro, materias_comum, tipo_rede)
         
