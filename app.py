@@ -68,7 +68,8 @@ df_parlamentares = limpa_colunas(df_parlamentares, 'votos_favor')
 df_parlamentares = limpa_colunas(df_parlamentares, 'votos_contra')
 df_materias_comum = limpa_colunas(df_materias_comum, 'outros_autores')
 
-tipos_rede = [{'label': 'Votos a Favor', 'value': 'favor'}, {'label': 'Votos Contra', 'value': 'contra'}]
+tipos_rede = [{'label': 'Votos a Favor', 'value': 'favor'}, {'label': 'Votos Contra', 'value': 'contra'}, \
+            {'label': 'Votos a Favor (Bipartido)', 'value': 'favor-bipartido'}, {'label': 'Votos Contra (Bipartido)', 'value': 'contra-bipartido'}]
 filtros_senadores = [{'label': 'Todos', 'value': 'todos'}, {'label': 'Somente Ativos', 'value': 'ativos'}, \
                      {'label': 'Somente Afastados', 'value': 'afastados'}, {'label': 'Partido', 'value': 'partido'},\
                      {'label': 'Alinhamento ao Governo', 'value': 'alinhamento'}, {'label': 'Customizar', 'value': 'customizar'}]
@@ -163,66 +164,72 @@ app.layout = html.Div([
         ],
         style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '50px', 'backgroundColor': 'rgb(250, 250, 250)'}),
         
-        html.Div(id='hidden-div-senadores', children=[
-            html.Div([
-                dcc.Checklist(
-                    id='senadores-checklist',
-                    options=[
-                        {'label': df_parlamentares.iloc[i]['tratamento'] + df_parlamentares.iloc[i]['nome'] + '\n',
-                         'value': df_parlamentares.iloc[i]['cod']} for i in range(len(df_parlamentares))
+        html.Div(id='hidden-divs', children=[
+            html.Div(id='div-filtros-senadores', children=[
+                html.Div(id='hidden-div-senadores', children=[
+                    html.Div([
+                        dcc.Checklist(
+                            id='senadores-checklist',
+                            options=[
+                                {'label': df_parlamentares.iloc[i]['tratamento'] + df_parlamentares.iloc[i]['nome'] + '\n',
+                                'value': df_parlamentares.iloc[i]['cod']} for i in range(len(df_parlamentares))
+                            ],
+                            labelStyle={'display': 'block'}
+                        )
                     ],
-                    labelStyle={'display': 'block'}
-                )
-            ],
-            style={'height': '150px', 'display': 'inline-block', 'overflow-y': 'scroll'}),
-            html.Div([
-                html.Button('Limpar', id='limpar-senadores', disabled=True,  n_clicks=0),
-            ])
-        ],
-        style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '200px'}),
+                    style={'height': '100px', 'display': 'inline-block', 'overflow-y': 'scroll'}),
+                    html.Div([
+                        html.Button('Limpar', id='limpar-senadores', disabled=True,  n_clicks=0),
+                    ])
+                ],
+                style={'display': 'none'}),
 
-        html.Div(id='hidden-div-partidos', children=[
-            html.Div([
-                dcc.Checklist(
-                    id='partidos-checklist',
-                    options=[{'label': df_partidos.iloc[i]['nome'] + ' (' + df_partidos.iloc[i]['sigla'] + ')',\
-                        'value': df_partidos.iloc[i]['cod']} for i in range(len(df_partidos))]
-                )
-            ],
-            style={'height': '150px', 'display': 'inline-block', 'overflow-y': 'scroll'}),
-            html.Div([
-                html.Button('Limpar', id='limpar-partidos', disabled=True,  n_clicks=0),
-            ])
-        ],
-        style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '200px'}),
+                html.Div(id='hidden-div-partidos', children=[
+                    html.Div([
+                        dcc.Checklist(
+                            id='partidos-checklist',
+                            options=[{'label': df_partidos.iloc[i]['nome'] + ' (' + df_partidos.iloc[i]['sigla'] + ')',\
+                                'value': df_partidos.iloc[i]['cod']} for i in range(len(df_partidos))]
+                        )
+                    ],
+                    style={'height': '100px', 'display': 'inline-block', 'overflow-y': 'scroll'}),
+                    html.Div([
+                        html.Button('Limpar', id='limpar-partidos', disabled=True,  n_clicks=0),
+                    ])
+                ],
+                style={'display': 'none'}),
 
-        html.Div(id='hidden-div-alinhamentos', children=[
-            html.Div([
-                dcc.Checklist(
-                    id='alinhamentos-checklist',
-                    options=[{'label': df_partidos['alinhamento'].unique()[i], 'value': df_partidos['alinhamento'].unique()[i]} for i in range(len(df_partidos['alinhamento'].unique()))]
-                )
+                html.Div(id='hidden-div-alinhamentos', children=[
+                    html.Div([
+                        dcc.Checklist(
+                            id='alinhamentos-checklist',
+                            options=[{'label': df_partidos['alinhamento'].unique()[i], 'value': df_partidos['alinhamento'].unique()[i]} for i in range(len(df_partidos['alinhamento'].unique()))]
+                        )
+                    ],
+                    style={'height': '100px', 'display': 'inline-block'}),
+                    html.Div([
+                        html.Button('Limpar', id='limpar-alinhamentos', disabled=True,  n_clicks=0),
+                    ])
+                ],
+                style={'display': 'none'})
             ],
-            style={'height': '150px', 'display': 'inline-block'}),
-            html.Div([
-                html.Button('Limpar', id='limpar-alinhamentos', disabled=True,  n_clicks=0),
-            ])
-        ],
-        style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '200px'}),
+            style={'float': 'top', 'height': '49%'}),
 
-        html.Div(id='hidden-div-analises', children=[
-            html.Div([
-                dcc.Dropdown(
-                    id='selecao-analise',
-                    options=[{'label': metricas_analise[i]['label'], 'value': metricas_analise[i]['value']} for i in
-                             range(len(metricas_analise))],
-                    value=metricas_analise[0]['value'],
-                    placeholder='Métrica Analisada'
-                )
+            html.Div(id='hidden-div-analises', children=[
+                html.Div([
+                    dcc.Dropdown(
+                        id='selecao-analise',
+                        options=[{'label': metricas_analise[i]['label'], 'value': metricas_analise[i]['value']} for i in
+                                 range(len(metricas_analise))],
+                        value=metricas_analise[0]['value'],
+                        placeholder='Métrica Analisada'
+                    )
+                ],
+                style={'display': 'inline-block', 'height': '99%', 'overflow-y': 'scroll'}),
             ],
-            style={'width': '59%', 'height': '300px', 'display': 'inline-block', 'overflow-y': 'scroll'}),
+            style={'display': 'none', 'float': 'bottom', 'height': '49%', 'backgroundColor': 'rgb(250, 250, 250)'}),
         ],
-        style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '200px', 'backgroundColor': 'rgb(250, 250, 250)'}),
+        style={'width': '49%', 'float': 'right', 'height': '200px'})
     ], style={
         'borderBottom': 'thin lightgrey solid',
         'backgroundColor': 'rgb(250, 250, 250)',
@@ -278,27 +285,27 @@ def filtra_senadores_alinhamento(alinhamentos):
     Input('filtro-senadores', 'value'))
 def toggle_custom_senadores(filtro):
     if filtro == 'customizar':
-        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '200px'}
+        return {'display': 'inline-block'}
     else:
-        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px'}
+        return {'display': 'none'}
 
 @app.callback(
     Output('hidden-div-partidos','style'),
     Input('filtro-senadores', 'value'))
 def toggle_custom_partidos(filtro):
     if filtro == 'partido':
-        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '200px'}
+        return {'display': 'inline-block'}
     else:
-        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px'}
+        return {'display': 'none'}
 
 @app.callback(
     Output('hidden-div-alinhamentos','style'),
     Input('filtro-senadores', 'value'))
 def toggle_custom_alinhamentos(filtro):
     if filtro == 'alinhamento':
-        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '200px'}
+        return {'display': 'inline-block'}
     else:
-        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'none', 'height': '200px'}
+        return {'display': 'none'}
 
 @app.callback(
     [Output('hidden-div-analises','style'),
@@ -307,10 +314,10 @@ def toggle_custom_alinhamentos(filtro):
 def toggle_select_metric(filtro):
     # FIXME: Quando coloco customização de senadores ao mesmo tempo que selecao de metrica o layout fica estranho
     if filtro is not None and len(filtro) > 0 and filtro[0] == 'analise':
-        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '200px'}, \
+        return {'display': 'inline-block', 'float': 'bottom', 'height': '49%'}, \
                'analise-nenhuma'
     else:
-        return {'width': '49%', 'float': 'right', 'display': 'none', 'height': '200px'}, 'analise-nenhuma'
+        return {'display': 'none', 'float': 'bottom', 'height': '49%'}, 'analise-nenhuma'
 
 @app.callback(
     [Output('hidden-div-ano','style'),
@@ -395,21 +402,22 @@ def limpa_partidos(n_cliques):
 def limpa_alinhamentos(n_cliques):
     return []
 
-def extrai_listas(df_parlamentares, df_materias_comum):
+def extrai_listas(df_parlamentares, df_materias_comum, df_materias):
     parlamentares = df_parlamentares['cod'].tolist()
-    materias = df_materias_comum['cod'].tolist()
-    return parlamentares, materias
+    materias_comum = df_materias_comum['cod'].tolist()
+    materias = df_materias['cod'].tolist()
+    return parlamentares, materias_comum, materias
 
 def cria_mat_adj_votos(df_parlamentares, df_materias_comum, parlamentares, materias, tipo_voto):
     n = len(df_parlamentares)
     A = np.zeros((n,n))
-    if tipo_voto != 'favor' and tipo_voto != 'contra':
-        print("tipo de voto não existe")
-        return
     if tipo_voto == 'favor':
         tipo_voto = 'votos_favor'
-    if tipo_voto == 'contra':
+    elif tipo_voto == 'contra':
         tipo_voto = 'votos_contra'
+    else:
+        print("tipo de voto não existe")
+        return
     for i in range(len(parlamentares)):
         votos = df_parlamentares.iloc[i][tipo_voto]
         for materia in votos:
@@ -468,7 +476,18 @@ def colore_por_afastamento(df_parlamentares):
             colors_dict[i] = "Ativo"
     return colors_node, colors_dict
 
-def cria_trace(G, df_parlamentares, cores):
+def colore_por_atributo(df_parlamentares, coloracao_nos):
+    colors_node = []
+    colors_dict = {}
+    if coloracao_nos == 'ativo':
+        for i in range(len(df_parlamentares)):
+            if df_parlamentares.iloc[i].afastado == 'Sim': #(df_parlamentares.afastado == "Sim").all():
+                colors_node.append('red')       # darksalmon
+            else:
+                colors_node.append('green')     # darkblue
+    return colors_node
+
+'''def cria_trace(G, df_parlamentares, cores):
     pos = nx.circular_layout(G) #nx.random_layout(G)
     edge_x = []
     edge_y = []
@@ -542,18 +561,47 @@ def plotta_grafo(edge_trace, node_trace):
                     xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
                     yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
                     )
-    return fig
+    return fig'''
+
+def cria_grafo_bipartido(df_parlamentares, df_materias, parlamentares, materias, tipo_voto):
+    if tipo_voto == 'favor-bipartido':
+        tipo_voto = 'votos_favor'
+    elif tipo_voto == 'contra-bipartido':
+        tipo_voto = 'votos_contra'
+    else:
+        print("tipo de voto não existe")
+        return
+    n = len(df_parlamentares)
+    m = len(df_materias)
+    A = np.zeros((n,m))
+    G = nx.Graph()
+    G.add_nodes_from(parlamentares, bipartite=0)
+    G.add_nodes_from(materias, bipartite=1)
+    for i in range(len(parlamentares)):
+        votos = df_parlamentares.iloc[i][tipo_voto]
+        for materia in votos:
+            materia = materia.replace('\'', '')
+            if materia == '':
+                continue
+            materia = int(materia)
+
+            if materia not in materias:
+                continue
+            index_materia = materias.index(materia)
+            G.add_edges_from([(i, index_materia)])
+    return G
 
 def filtrar_por_ano(df_info, ano):
+    # TODO: reavaliar para o novo tipo de rede
     df_ano = df_info.loc[df_info['ano_votacao'] == ano]
     ret = df_ano['cod'].tolist()
     return ret
 
 def filtrar_por_mandato(df_info, ano):
+    # TODO: reavaliar para o novo tipo de rede
     df_ano = df_info.loc[(df_info['ano_votacao'] >= ano) & (df_info['ano_votacao'] <= ano+3)]
     ret = df_ano['cod'].tolist()
     return ret
-
 
 def analisar_grafo(graph, metrica, atributo=None):
     if metrica == 'analise-nenhuma':
@@ -782,6 +830,316 @@ def analisar_grafo(graph, metrica, atributo=None):
 
 
 
+def converte_grafo_df(G, df_parlamentares):
+    novas_colunas = ['pos_x', 'pos_y', 'adjacencias']
+    df_arestas = pd.DataFrame(columns=['id_entrada', 'id_saida'])
+
+    pos_x = []
+    pos_y = []
+    adjacencias = []
+    id_entrada = []
+    id_saida = []
+
+    for edge in G.edges():
+        id_entrada.append(edge[0])
+        id_saida.append(edge[1])
+
+    pos = nx.circular_layout(G)
+
+    for node in G.nodes():
+        x, y = pos[node]
+        pos_x.append(x)
+        pos_y.append(y)
+
+    for node, adjacencies in enumerate(G.adjacency()):
+        adjacencias.append(adjacencies[1])
+
+    df_parlamentares['pos_x'] = pos_x
+    df_parlamentares['pos_y'] = pos_y
+    df_parlamentares['adjacencias'] = adjacencias
+    df_arestas['id_entrada'] = id_entrada
+    df_arestas['id_saida'] = id_saida
+
+    return df_parlamentares, df_arestas
+
+def cria_trace(df_parlamentares, df_arestas, cores):
+    edge_x = []
+    edge_y = []
+    for i in range(len(df_arestas)):
+        x0 = df_parlamentares.iloc[df_arestas.iloc[i]['id_entrada']]['pos_x']
+        y0 = df_parlamentares.iloc[df_arestas.iloc[i]['id_entrada']]['pos_y']
+        x1 = df_parlamentares.iloc[df_arestas.iloc[i]['id_saida']]['pos_x']
+        y1 = df_parlamentares.iloc[df_arestas.iloc[i]['id_saida']]['pos_y']
+        edge_x.append(x0)
+        edge_x.append(x1)
+        edge_x.append(None)
+        edge_y.append(y0)
+        edge_y.append(y1)
+        edge_y.append(None)
+
+    edge_trace = go.Scatter(
+        x=edge_x, y=edge_y,
+        line=dict(width=0.5, color='#888'),
+        hoverinfo='none',
+        mode='lines')
+
+    node_x = []
+    node_y = []
+    for i in range(len(df_parlamentares)):
+        x = df_parlamentares.iloc[i]['pos_x']
+        y = df_parlamentares.iloc[i]['pos_y']
+        node_x.append(x)
+        node_y.append(y)
+
+    node_trace = go.Scatter(
+        x=node_x, y=node_y,
+        mode='markers',
+        hoverinfo='text')
+    
+    if cores == 'conexoes':
+        node_trace.marker=dict(
+            showscale=True,
+            # colorscale options
+            #'Greys' | 'YlGnBu' | 'Greens' | 'YlOrRd' | 'Bluered' | 'RdBu' |
+            #'Reds' | 'Blues' | 'Picnic' | 'Rainbow' | 'Portland' | 'Jet' |
+            #'Hot' | 'Blackbody' | 'Earth' | 'Electric' | 'Viridis' |
+            colorscale='YlGnBu',
+            reversescale=True,
+            color=[],
+            size=10,
+            colorbar=dict(
+                thickness=15,
+                title='Número de conexões',
+                xanchor='left',
+                titleside='right'
+            ),
+            line_width=2)
+    elif cores == 'ativo':
+        cores_dos_nos = colore_por_atributo(df_parlamentares, cores)
+        node_trace.marker=dict(
+            reversescale=True,
+            color=cores_dos_nos,
+            size=10,
+            line_width=2)
+
+    node_text = []
+
+    if cores == 'conexoes':
+        node_adjacencies = []
+
+    for adjacencias in df_parlamentares['adjacencias'].tolist():
+        if cores == 'conexoes':
+            node_adjacencies.append(len(adjacencias))
+        for node, adjacencies in enumerate(adjacencias):
+            node_text.append(str(df_parlamentares.iloc[node].tratamento) + \
+                            str(df_parlamentares.iloc[node].nome) )
+            if pd.isnull(df_parlamentares.iloc[node].email) == False:
+                node_text[-1] = node_text[-1] + \
+                                '<br>e-mail: ' + str(df_parlamentares.iloc[node].email)# + \
+                                #'<br>UF: ' + str(df_parlamentares.iloc[node].uf)
+
+    if cores == 'conexoes':
+        node_trace.marker.color = node_adjacencies
+    node_trace.text = node_text
+
+    return edge_trace, node_trace
+
+def cria_trace_bipartido(G, df_parlamentares, df_materias, pos, cores):
+    edge_x = []
+    edge_y = []
+    for edge in G.edges():
+        x0, y0 = pos[edge[0]]
+        x1, y1 = pos[edge[1]]
+        edge_x.append(x0)
+        edge_x.append(x1)
+        edge_x.append(None)
+        edge_y.append(y0)
+        edge_y.append(y1)
+        edge_y.append(None)
+
+    edge_trace = go.Scatter(
+        x=edge_x, y=edge_y,
+        line=dict(width=0.5, color='#888'),
+        hoverinfo='none',
+        mode='lines')
+
+    node_x_senadores = []
+    node_y_senadores = []
+    node_x_materias = []
+    node_y_materias = []
+    for node in nx.get_node_attributes(G,'bipartite'):
+        x, y = pos[node]
+        if nx.get_node_attributes(G,'bipartite')[node] == 0:
+            node_x_senadores.append(x)
+            node_y_senadores.append(y)
+        else:
+            node_x_materias.append(x)
+            node_y_materias.append(y)
+
+    node_trace_senadores = go.Scatter(
+        x=node_x_senadores, y=node_y_senadores,
+        mode='markers',
+        hoverinfo='text')
+
+    if cores == 'conexoes':
+        node_trace_senadores.marker=dict(
+            showscale=True,
+            # colorscale options
+            #'Greys' | 'YlGnBu' | 'Greens' | 'YlOrRd' | 'Bluered' | 'RdBu' |
+            #'Reds' | 'Blues' | 'Picnic' | 'Rainbow' | 'Portland' | 'Jet' |
+            #'Hot' | 'Blackbody' | 'Earth' | 'Electric' | 'Viridis' |
+            colorscale='YlGnBu',
+            reversescale=True,
+            color=[],
+            size=10,
+            colorbar=dict(
+                thickness=15,
+                title='Número de conexões',
+                xanchor='left',
+                titleside='right'
+            ),
+            line_width=2)
+    elif cores == 'ativo':
+        cores_dos_nos = colore_por_atributo(df_parlamentares, cores)
+        node_trace_senadores.marker=dict(
+            reversescale=True,
+            color=cores_dos_nos,
+            size=10,
+            line_width=2)
+
+    node_trace_materias = go.Scatter(
+        x=node_x_materias, y=node_y_materias,
+        mode='markers',
+        hoverinfo='text',
+        marker=dict(
+            size=5,
+            line_width=2))
+
+    node_text_senadores = []
+    node_text_materias = []
+
+    node_adjacencies = []
+
+    for node, adjacencies in enumerate(G.adjacency()):
+        if node in nx.get_node_attributes(G,'bipartite'):
+            if nx.get_node_attributes(G,'bipartite')[node] == 0:
+                if cores == 'afastado':
+                    if df_parlamentares[df_parlamentares['cod'] == node].afastado.values[0] == 'Sim':
+                        node_adjacencies.append(1)
+                    else:
+                        node_adjacencies.append(2)
+                elif cores == 'conexoes':
+                    node_adjacencies.append(len(adjacencies[1]))
+                node_text_senadores.append(str(df_parlamentares[df_parlamentares['cod'] == node].tratamento.values[0]) + \
+                                str(df_parlamentares[df_parlamentares['cod'] == node].nome.values[0]) )
+                if pd.isnull(df_parlamentares[df_parlamentares['cod'] == node].email.values[0]) == False:
+                    node_text_senadores[-1] = node_text_senadores[-1] + \
+                                    '<br>e-mail: ' + str(df_parlamentares[df_parlamentares['cod'] == node].email.values[0])
+            else:
+                node_text_materias.append('Subtipo da matéria: ' + str(df_materias[df_materias['cod'] == node].nome_subtipo.values[0]))
+
+    node_trace_senadores.marker.color = node_adjacencies
+    node_trace_senadores.text = node_text_senadores
+    node_trace_materias.text = node_text_materias
+
+    return edge_trace, node_trace_senadores, node_trace_materias
+
+def cria_pos_bipartido(G):
+    u = []
+    for key in nx.get_node_attributes(G,'bipartite'):
+        if nx.get_node_attributes(G,'bipartite')[key] == 0:
+            u.append(key)
+    #u = [n for n in G.nodes if nx.get_node_attributes(G,'bipartite')[n] == 0]
+    l, r = nx.bipartite.sets(G, top_nodes=u)
+    pos = {}
+
+    # Update position for node from each group
+    pos.update((node, (1, index)) for index, node in enumerate(l))
+    pos.update((node, (2, index)) for index, node in enumerate(r))
+
+    return pos
+
+def converte_grafo_df_bipartido(G, df_parlamentares, df_materias, pos):
+    novas_colunas = ['pos_x', 'pos_y', 'adjacencias']
+    df_arestas = pd.DataFrame(columns=['id_entrada', 'id_saida'])
+
+    pos_x_senador = []
+    pos_y_senador = []
+    adjacencias_senador = []
+
+    pos_x_materia = []
+    pos_y_materia = []
+    adjacencias_materia = []
+
+    id_entrada = []
+    id_saida = []
+
+    for edge in G.edges():
+        id_entrada.append(edge[0])
+        id_saida.append(edge[1])
+
+    for node in G.nodes():
+        x, y = pos[node]
+        if nx.get_node_attributes(G,'bipartite')[node] == 0:
+            pos_x_senador.append(x)
+            pos_y_senador.append(y)
+        else:
+            pos_x_materia.append(x)
+            pos_y_materia.append(y)
+
+    for node, adjacencies in enumerate(G.adjacency()):
+        if nx.get_node_attributes(G,'bipartite')[node] == 0:
+            adjacencias_senador.append(adjacencies[1])
+        else:
+            adjacencias_materia.append(adjacencies[1])
+
+    df_parlamentares['pos_x'] = pos_x_senador
+    df_parlamentares['pos_y'] = pos_y_senador
+    df_parlamentares['adjacencias'] = adjacencias_senador
+
+    df_materias['pos_x'] = pos_x_materia
+    df_materias['pos_y'] = pos_y_materia
+    df_materias['adjacencias'] = adjacencias_materia
+
+    df_arestas['id_entrada'] = id_entrada
+    df_arestas['id_saida'] = id_saida
+
+    return df_parlamentares, df_materias, df_arestas
+
+def plotta_grafo(edge_trace, node_trace):
+    fig = go.Figure(data=[edge_trace, node_trace],
+                layout=go.Layout(
+                    title='<br>Rede de Votações de Matérias de Parlamentares',
+                    titlefont_size=16,
+                    showlegend=False,
+                    hovermode='closest',
+                    margin=dict(b=20,l=5,r=5,t=40),
+                    annotations=[ dict(
+                        showarrow=False,
+                        xref="paper", yref="paper",
+                        x=0.005, y=-0.002 ) ],
+                    xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                    yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
+                    )
+    return fig
+
+def plotta_grafo_bipartido(edge_trace, node_trace_senadores, node_trace_materias):
+    fig = go.Figure(data=[edge_trace, node_trace_senadores, node_trace_materias],
+                layout=go.Layout(
+                    title='<br>Rede de Votações de Matérias de Parlamentares',
+                    titlefont_size=16,
+                    showlegend=False,
+                    hovermode='closest',
+                    margin=dict(b=20,l=5,r=5,t=40),
+                    annotations=[ dict(
+                        showarrow=False,
+                        xref="paper", yref="paper",
+                        x=0.005, y=-0.002 ) ],
+                    xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                    yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
+                    )
+    return fig
+
 @app.callback(
     [Output('graph', 'figure'),
      Output('detalhes-analises', 'children')],
@@ -812,27 +1170,41 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
         df_parlamentares_filtro = filtra_senadores_alinhamento(alinhamentos_checklist)
     else:
         df_parlamentares_filtro = global_store(filtro_senadores)
-    parlamentares_filtro, materias = extrai_listas(df_parlamentares_filtro, df_materias_comum)
-
-    # Filtro temportal
-    # TODO: A extracao das materias nao esta generalizada para o outro tipo de rede
-    if filtrar_tempo == 'tempo-ano':
-        materias = filtrar_por_ano(df_materias_comum, filtro_ano)
-    elif filtrar_tempo == 'tempo-mandato':
-        materias = filtrar_por_mandato(df_materias_comum, filtro_mandato)
-
-    A = cria_mat_adj_votos(df_parlamentares_filtro, df_materias_comum, parlamentares_filtro, materias, tipo_rede)
-    if filtrar_senadores is not None and len(filtrar_senadores) > 0 and filtrar_senadores[0] == 'filtrar':
-        A, parlamentares_filtro = filtra_mat_adj_votos(A, parlamentares_filtro)
-        df_parlamentares_filtro = filtra_df_parlamentares(df_parlamentares_filtro, parlamentares_filtro)
-    G = nx.from_numpy_matrix(A)
-    if coloracao_nos == 'ativo':
-        cores_dos_nos, atr_dict = colore_por_afastamento(df_parlamentares_filtro)
-        if metrica_analise == 'analise-assortatividade':
-            nx.set_node_attributes(G, atr_dict, name="Ativo/Afastado")
-    analise = analisar_grafo(G, metrica_analise, atributo="Ativo/Afastado")
-    edge_trace, node_trace = cria_trace(G, df_parlamentares_filtro, cores_dos_nos)
-    fig = plotta_grafo(edge_trace, node_trace)
+    parlamentares_filtro, materias_comum, materias = extrai_listas(df_parlamentares_filtro, df_materias_comum, df_materias)
+    
+    if tipo_rede == 'favor' or tipo_rede == 'contra':
+        # Filtro temportal
+        # TODO: A extracao das materias nao esta generalizada para o outro tipo de rede
+        if filtrar_tempo == 'tempo-ano':
+            materias = filtrar_por_ano(df_materias_comum, filtro_ano)
+        elif filtrar_tempo == 'tempo-mandato':
+            materias = filtrar_por_mandato(df_materias_comum, filtro_mandato)
+        
+        A = cria_mat_adj_votos(df_parlamentares_filtro, df_materias_comum, parlamentares_filtro, materias_comum, tipo_rede)
+        
+        if filtrar_senadores is not None and len(filtrar_senadores) > 0 and filtrar_senadores[0] == 'filtrar':
+            A, parlamentares_filtro = filtra_mat_adj_votos(A, parlamentares_filtro)
+            df_parlamentares_filtro = filtra_df_parlamentares(df_parlamentares_filtro, parlamentares_filtro)
+        G = nx.from_numpy_matrix(A)
+        
+        df_parlamentares_filtro, df_arestas = converte_grafo_df(G, df_parlamentares_filtro)
+        edge_trace, node_trace = cria_trace(df_parlamentares_filtro, df_arestas, coloracao_nos)
+        
+        if coloracao_nos == 'ativo':
+            cores_dos_nos, atr_dict = colore_por_afastamento(df_parlamentares_filtro)
+            if metrica_analise == 'analise-assortatividade':
+                nx.set_node_attributes(G, atr_dict, name="Ativo/Afastado")
+                
+        analise = analisar_grafo(G, metrica_analise, atributo="Ativo/Afastado")
+        fig = plotta_grafo(edge_trace, node_trace)
+        
+    elif tipo_rede == 'favor-bipartido' or tipo_rede == 'contra-bipartido':
+        G = cria_grafo_bipartido(df_parlamentares_filtro, df_materias, parlamentares_filtro, materias, tipo_rede)
+        pos = cria_pos_bipartido(G)
+        edge_trace, node_trace_senadores, node_trace_materias = cria_trace_bipartido(G, df_parlamentares_filtro, df_materias, pos, coloracao_nos)
+        fig = plotta_grafo_bipartido(edge_trace, node_trace_senadores, node_trace_materias)
+        analise = []
+        
     fig.update_layout(transition_duration=500)
     print('update')
     return [fig, analise]
