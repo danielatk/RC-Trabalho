@@ -84,6 +84,12 @@ metricas_analise = [{'label': "Nenhuma",                        'value': 'analis
                     {'label': "Centralidade de Closeness",      'value': 'analise-closns'},
                     {'label': "Centralidade de PageRank",       'value': 'analise-pgrank'},
                     {'label': "Homofilia por Assortatividade",  'value': 'analise-assortatividade'},]
+mostrar_tempo = [{'label': 'Nenhum', 'value':'tempo-todos'},
+                 {'label': 'Mostrar por ano', 'value':'tempo-ano'},
+                 {'label': 'Mostrar por mandato eleitoral', 'value':'tempo-mandato'}]
+anos = [{'label':str(i), 'value':i} for i in range(1991,2021)]
+mandatos_eleitorais = [{'label':'{} - {}'.format(i, i+3), 'value':i} for i in range(1991,2021,4)]
+#[{'label': 'Todos', 'value':'mandato-todos'}]
 
 app.layout = html.Div([
     html.Div([
@@ -108,11 +114,11 @@ app.layout = html.Div([
                 value=cores_nos[0]['value'],
                 placeholder='Coloração dos Nós'
             ),
-            dcc.Checklist(
-                id='mostrar-por-ano',
-                options=[
-                    {'label': 'Mostrar por Ano', 'value': 'ano'},
-                ]
+            dcc.Dropdown(
+                id='filtrar-tempo',
+                options=[{'label': mostrar_tempo[i]['label'], 'value': mostrar_tempo[i]['value']} for i in range(len(mostrar_tempo))],
+                value=mostrar_tempo[0]['value'],
+                placeholder='Filtro temporal'
             ),
             dcc.Checklist(
                 id='filtrar-senadores',
@@ -129,6 +135,34 @@ app.layout = html.Div([
             html.Button('Gerar Grafo', id='botao-gerar-grafo', disabled=True,  n_clicks=0),
         ],
         style={'width': '49%', 'display': 'inline-block'}),
+
+        html.Div(id='hidden-div-ano', children=[
+            html.Div([
+                dcc.Dropdown(
+                    id='selecao-ano',
+                    options=[{'label': anos[i]['label'], 'value': anos[i]['value']} for i in
+                             range(len(anos))],
+                    value=anos[-1]['value'],
+                    placeholder='Ano',
+                    searchable=True
+                )
+                # FIXME: Não estão aparecendo as opções!
+            ],style={'width': '59%', 'display': 'inline-block', 'overflow-y': 'scroll'}),
+        ],
+        style={'width': '49%', 'float': 'right', 'display': 'none', 'backgroundColor': 'rgb(250, 250, 250)'}),
+
+        html.Div(id='hidden-div-mandato', children=[
+            html.Div([
+                dcc.Dropdown(
+                    id='selecao-mandato',
+                    options=[{'label': mandatos_eleitorais[i]['label'], 'value': mandatos_eleitorais[i]['value']}
+                             for i in range(len(mandatos_eleitorais))],
+                    value=mandatos_eleitorais[-1]['value'],
+                    placeholder='Mandato Eleitoral'
+                )
+            ],style={'width': '59%', 'height': '300px', 'display': 'inline-block', 'overflow-y': 'scroll'}),
+        ],
+        style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '50px', 'backgroundColor': 'rgb(250, 250, 250)'}),
         
         html.Div(id='hidden-divs', children=[
             html.Div(id='div-filtros-senadores', children=[
@@ -284,6 +318,25 @@ def toggle_select_metric(filtro):
                'analise-nenhuma'
     else:
         return {'display': 'none', 'float': 'bottom', 'height': '49%'}, 'analise-nenhuma'
+
+@app.callback(
+    [Output('hidden-div-ano','style'),
+     Output('hidden-div-mandato','style')],
+    [Input('filtrar-tempo', 'value')]
+)
+def toggle_custom_time(filtro):
+    if filtro == 'tempo-ano':
+        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '10px'}, \
+               {'width': '49%', 'float': 'right', 'display': 'none'}
+    elif filtro == 'tempo-mandato':
+        return {'width': '49%', 'float': 'right', 'display': 'none'}, \
+               {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '10px'}
+    else:
+        return {'width': '49%', 'float': 'right', 'display': 'none'}, {'width': '49%', 'float': 'right', 'display': 'none'}
+
+# FIXME: Layout esquisito quanto se mistura hidden divs!
+#   Não consegui resolver diminuindo o tamanho dos divs....
+
 
 @app.callback(
     Output('info-metricas','style'),
@@ -538,6 +591,18 @@ def cria_grafo_bipartido(df_parlamentares, df_materias, parlamentares, materias,
             G.add_edges_from([(i, index_materia)])
     return G
 
+def filtrar_por_ano(df_info, ano):
+    # TODO: reavaliar para o novo tipo de rede
+    df_ano = df_info.loc[df_info['ano_votacao'] == ano]
+    ret = df_ano['cod'].tolist()
+    return ret
+
+def filtrar_por_mandato(df_info, ano):
+    # TODO: reavaliar para o novo tipo de rede
+    df_ano = df_info.loc[(df_info['ano_votacao'] >= ano) & (df_info['ano_votacao'] <= ano+3)]
+    ret = df_ano['cod'].tolist()
+    return ret
+
 def analisar_grafo(graph, metrica, atributo=None):
     if metrica == 'analise-nenhuma':
         return []
@@ -763,13 +828,6 @@ def analisar_grafo(graph, metrica, atributo=None):
 
         return children
 
-
-#@app.callback(
-#    Output('minmax', 'children'),
-#    Input('botao-gerar-grafo', 'n_clicks')
-#)
-#def teste(cliques):
-#    return [html.P('Testando para ver se funciona com um output so!')]
 
 
 def converte_grafo_df(G, df_parlamentares):
@@ -1093,11 +1151,14 @@ def plotta_grafo_bipartido(edge_trace, node_trace_senadores, node_trace_materias
      State('senadores-checklist', 'value'),
      State('partidos-checklist', 'value'),
      State('alinhamentos-checklist', 'value'),
-     State('mostrar-por-ano', 'value'),
-     State('selecao-analise', 'value')]
+     State('filtrar-tempo', 'value'),
+     State('selecao-ano', 'value'),
+     State('selecao-mandato', 'value'),
+     State('selecao-analise', 'value'),]
 )
 def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtrar_senadores, senadores_checklist,\
-                    partidos_checklist, alinhamentos_checklist, mostrar_por_ano, metrica_analise):
+                   partidos_checklist, alinhamentos_checklist, filtrar_tempo, filtro_ano, filtro_mandato,\
+                   metrica_analise):
     #if n_cliques == 0:
     #    return
     print("gerando rede")
@@ -1110,26 +1171,40 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
     else:
         df_parlamentares_filtro = global_store(filtro_senadores)
     parlamentares_filtro, materias_comum, materias = extrai_listas(df_parlamentares_filtro, df_materias_comum, df_materias)
+    
     if tipo_rede == 'favor' or tipo_rede == 'contra':
+        # Filtro temportal
+        # TODO: A extracao das materias nao esta generalizada para o outro tipo de rede
+        if filtrar_tempo == 'tempo-ano':
+            materias = filtrar_por_ano(df_materias_comum, filtro_ano)
+        elif filtrar_tempo == 'tempo-mandato':
+            materias = filtrar_por_mandato(df_materias_comum, filtro_mandato)
+        
         A = cria_mat_adj_votos(df_parlamentares_filtro, df_materias_comum, parlamentares_filtro, materias_comum, tipo_rede)
+        
         if filtrar_senadores is not None and len(filtrar_senadores) > 0 and filtrar_senadores[0] == 'filtrar':
             A, parlamentares_filtro = filtra_mat_adj_votos(A, parlamentares_filtro)
             df_parlamentares_filtro = filtra_df_parlamentares(df_parlamentares_filtro, parlamentares_filtro)
         G = nx.from_numpy_matrix(A)
+        
         df_parlamentares_filtro, df_arestas = converte_grafo_df(G, df_parlamentares_filtro)
         edge_trace, node_trace = cria_trace(df_parlamentares_filtro, df_arestas, coloracao_nos)
+        
         if coloracao_nos == 'ativo':
             cores_dos_nos, atr_dict = colore_por_afastamento(df_parlamentares_filtro)
             if metrica_analise == 'analise-assortatividade':
                 nx.set_node_attributes(G, atr_dict, name="Ativo/Afastado")
+                
         analise = analisar_grafo(G, metrica_analise, atributo="Ativo/Afastado")
         fig = plotta_grafo(edge_trace, node_trace)
+        
     elif tipo_rede == 'favor-bipartido' or tipo_rede == 'contra-bipartido':
         G = cria_grafo_bipartido(df_parlamentares_filtro, df_materias, parlamentares_filtro, materias, tipo_rede)
         pos = cria_pos_bipartido(G)
         edge_trace, node_trace_senadores, node_trace_materias = cria_trace_bipartido(G, df_parlamentares_filtro, df_materias, pos, coloracao_nos)
         fig = plotta_grafo_bipartido(edge_trace, node_trace_senadores, node_trace_materias)
         analise = []
+        
     fig.update_layout(transition_duration=500)
     print('update')
     return [fig, analise]
