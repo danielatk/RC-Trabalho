@@ -591,17 +591,18 @@ def cria_grafo_bipartido(df_parlamentares, df_materias, parlamentares, materias,
             G.add_edges_from([(i, index_materia)])
     return G
 
+
 def filtrar_por_ano(df_info, ano):
-    # TODO: reavaliar para o novo tipo de rede
     df_ano = df_info.loc[df_info['ano_votacao'] == ano]
     ret = df_ano['cod'].tolist()
     return ret
 
+
 def filtrar_por_mandato(df_info, ano):
-    # TODO: reavaliar para o novo tipo de rede
     df_ano = df_info.loc[(df_info['ano_votacao'] >= ano) & (df_info['ano_votacao'] <= ano+3)]
     ret = df_ano['cod'].tolist()
     return ret
+
 
 def analisar_grafo(graph, metrica, atributo=None):
     if metrica == 'analise-nenhuma':
@@ -823,11 +824,7 @@ def analisar_grafo(graph, metrica, atributo=None):
         )
         children += [html.Div([dcc.Graph(figure=fig)], style={'width': '49%', 'display': 'inline-block'})]
 
-        # FIXME: Tem um bug nesse resultado: Mesmo deixando so os senadores com conexao, esta dizendo que tem zero
-        # arestas de afastado para qualquer coisa. Claramente nao pode ser, ja que eles permaneceram no grafo
-
         return children
-
 
 
 def converte_grafo_df(G, df_parlamentares):
@@ -1114,10 +1111,11 @@ def plotta_grafo(edge_trace, node_trace):
                     showlegend=False,
                     hovermode='closest',
                     margin=dict(b=20,l=5,r=5,t=40),
-                    annotations=[ dict(
-                        showarrow=False,
-                        xref="paper", yref="paper",
-                        x=0.005, y=-0.002 ) ],
+                    #annotations=[ dict(
+                    #    showarrow=False,
+                    #    xref="paper", yref="paper",
+                    #    x=0.005, y=-0.002 ) ],
+                    height=800,
                     xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
                     yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
                     )
@@ -1131,10 +1129,11 @@ def plotta_grafo_bipartido(edge_trace, node_trace_senadores, node_trace_materias
                     showlegend=False,
                     hovermode='closest',
                     margin=dict(b=20,l=5,r=5,t=40),
-                    annotations=[ dict(
-                        showarrow=False,
-                        xref="paper", yref="paper",
-                        x=0.005, y=-0.002 ) ],
+                    #annotations=[ dict(
+                    #    showarrow=False,
+                    #    xref="paper", yref="paper",
+                    #    x=0.005, y=-0.002 ) ],
+                    height=500,
                     xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
                     yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
                     )
@@ -1198,6 +1197,12 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
         fig = plotta_grafo(edge_trace, node_trace)
         
     elif tipo_rede == 'favor-bipartido' or tipo_rede == 'contra-bipartido':
+        # Filtro temportal
+        if filtrar_tempo == 'tempo-ano':
+            materias = filtrar_por_ano(df_materias, filtro_ano)
+        elif filtrar_tempo == 'tempo-mandato':
+            materias = filtrar_por_mandato(df_materias, filtro_mandato)
+
         G = cria_grafo_bipartido(df_parlamentares_filtro, df_materias, parlamentares_filtro, materias, tipo_rede)
         pos = cria_pos_bipartido(G)
         edge_trace, node_trace_senadores, node_trace_materias = cria_trace_bipartido(G, df_parlamentares_filtro, df_materias, pos, coloracao_nos)
