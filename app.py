@@ -118,21 +118,24 @@ app.layout = html.Div([
                 id='filtrar-tempo',
                 options=[{'label': mostrar_tempo[i]['label'], 'value': mostrar_tempo[i]['value']} for i in range(len(mostrar_tempo))],
                 value=mostrar_tempo[0]['value'],
-                placeholder='Filtro temporal'
+                placeholder='Filtro temporal',
+                style={'margin-bottom': '7px'}
             ),
             dcc.Checklist(
                 id='filtrar-senadores',
                 options=[
-                    {'label': 'Mostrar Somente Parlamentares com Conexão', 'value': 'filtrar'},
+                    {'label': 'Mostrar Somente Componentes com Conexão', 'value': 'filtrar'},
                 ]
             ),
             dcc.Checklist(
                 id='fazer-analise',
                 options=[
                     {'label': 'Caracterização por métricas', 'value': 'analise'},
-                ]
+                ],
+                style={'margin-bottom': '4px'}
             ),
-            html.Button('Gerar Grafo', id='botao-gerar-grafo', disabled=True,  n_clicks=0),
+            html.Button('Gerar Grafo', id='botao-gerar-grafo', disabled=True,  n_clicks=0,
+                        style={'margin-bottom': '6px'}),
         ],
         style={'width': '49%', 'display': 'inline-block'}),
 
@@ -149,7 +152,7 @@ app.layout = html.Div([
                 # FIXME: Não estão aparecendo as opções!
             ],style={'width': '59%', 'display': 'inline-block', 'overflow-y': 'scroll'}),
         ],
-        style={'width': '49%', 'float': 'right', 'display': 'none', 'backgroundColor': 'rgb(250, 250, 250)'}),
+        style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '50px', 'backgroundColor': 'rgb(250, 250, 250)'}),
 
         html.Div(id='hidden-div-mandato', children=[
             html.Div([
@@ -225,11 +228,11 @@ app.layout = html.Div([
                         placeholder='Métrica Analisada'
                     )
                 ],
-                style={'display': 'inline-block', 'height': '99%', 'overflow-y': 'scroll'}),
+                style={'display': 'inline-block', 'float': 'left', 'width': '79%', 'height': '99%', 'overflow-y': 'scroll'}),
             ],
-            style={'display': 'none', 'float': 'bottom', 'height': '49%', 'backgroundColor': 'rgb(250, 250, 250)'}),
+            style={'display': 'none', 'float': 'bottom', 'height': '200px', 'backgroundColor': 'rgb(250, 250, 250)'}),
         ],
-        style={'width': '49%', 'float': 'right', 'height': '200px'})
+        style={'width': '49%', 'float': 'right'})
     ], style={
         'borderBottom': 'thin lightgrey solid',
         'backgroundColor': 'rgb(250, 250, 250)',
@@ -314,10 +317,10 @@ def toggle_custom_alinhamentos(filtro):
 def toggle_select_metric(filtro):
     # FIXME: Quando coloco customização de senadores ao mesmo tempo que selecao de metrica o layout fica estranho
     if filtro is not None and len(filtro) > 0 and filtro[0] == 'analise':
-        return {'display': 'inline-block', 'float': 'bottom', 'height': '49%'}, \
+        return {'display': 'block', 'float': 'left', 'height': '200px', 'width': '59%'}, \
                'analise-nenhuma'
     else:
-        return {'display': 'none', 'float': 'bottom', 'height': '49%'}, 'analise-nenhuma'
+        return {'display': 'none', 'float': 'left', 'height': '200px'}, 'analise-nenhuma'
 
 @app.callback(
     [Output('hidden-div-ano','style'),
