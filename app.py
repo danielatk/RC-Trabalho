@@ -128,6 +128,12 @@ app.layout = html.Div([
                 ]
             ),
             dcc.Checklist(
+                id='filtrar-materias',
+                options=[
+                    {'label': 'Filtrar Matérias por Subtipo', 'value': 'filtrar'}
+                ]
+            ),
+            dcc.Checklist(
                 id='fazer-analise',
                 options=[
                     {'label': 'Caracterização por métricas', 'value': 'analise'},
@@ -167,6 +173,21 @@ app.layout = html.Div([
         ],
         style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '50px', 'backgroundColor': 'rgb(250, 250, 250)'}),
         
+        html.Div(id='hidden-div-materias', children=[
+            html.Div([
+                dcc.Checklist(
+                    id='materias-checklist',
+                    options=[{'label': df_materias.nome_subtipo.unique()[i], 'value': df_materias.sigla_subtipo.unique()[i]} \
+                        for i in range(len(df_materias.sigla_subtipo.unique()))]
+                )
+            ],
+            style={'width': '59%', 'height': '200px', 'display': 'inline-block', 'overflow-y': 'scroll'}),
+            html.Div([
+                html.Button('Limpar', id='limpar-materias', disabled=True,  n_clicks=0),
+            ])
+        ],
+        style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '50px', 'backgroundColor': 'rgb(250, 250, 250)'}),
+
         html.Div(id='hidden-divs', children=[
             html.Div(id='div-filtros-senadores', children=[
                 html.Div(id='hidden-div-senadores', children=[
@@ -267,8 +288,18 @@ def global_store(value):
     elif value == 'todos' or value == 'customizar':
         return df_parlamentares
 
+def global_store_materias():
+    return df_materias
+
+def global_store_materias_comum():
+    return df_materias_comum
+
 def filtra_senadores_custom(senadores):
     return df_parlamentares[df_parlamentares['cod'].isin(senadores)]
+
+def filtra_materias_subtipo(df_materias, materias):
+    df_materias = df_materias[df_materias['sigla_subtipo'].isin(materias)]
+    return df_materias
 
 def filtra_senadores_partido(partidos):
     df_parlamentares = global_store('todos')
@@ -323,6 +354,15 @@ def toggle_select_metric(filtro):
         return {'display': 'none', 'float': 'left', 'height': '200px'}, 'analise-nenhuma'
 
 @app.callback(
+    Output('hidden-div-materias','style'),
+    Input('filtrar-materias', 'value'))
+def toggle_custom_materias(filtro):
+    if filtro is not None and filtro[0] == 'filtrar':
+        return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '10px'}
+    else:
+        return {'width': '49%', 'float': 'right', 'display': 'none'}
+
+@app.callback(
     [Output('hidden-div-ano','style'),
      Output('hidden-div-mandato','style')],
     [Input('filtrar-tempo', 'value')]
@@ -371,6 +411,14 @@ def toggle_botao_limpar_senadores(checklist):
     return True
 
 @app.callback(
+    Output('limpar-materias','disabled'),
+    Input('materias-checklist', 'value'))
+def toggle_botao_limpar_materias(checklist):
+    if checklist is not None and len(checklist) > 0:
+        return False
+    return True
+
+@app.callback(
     Output('limpar-partidos','disabled'),
     Input('partidos-checklist', 'value'))
 def toggle_botao_limpar_partidos(checklist):
@@ -405,13 +453,9 @@ def limpa_partidos(n_cliques):
 def limpa_alinhamentos(n_cliques):
     return []
 
-def extrai_listas(df_parlamentares, df_materias_comum, df_materias):
+def cria_mat_adj_votos(df_parlamentares, df_materias_comum, tipo_voto):
     parlamentares = df_parlamentares['cod'].tolist()
-    materias_comum = df_materias_comum['cod'].tolist()
-    materias = df_materias['cod'].tolist()
-    return parlamentares, materias_comum, materias
-
-def cria_mat_adj_votos(df_parlamentares, df_materias_comum, parlamentares, materias, tipo_voto):
+    materias = df_materias_comum['cod'].tolist()
     n = len(df_parlamentares)
     A = np.zeros((n,n))
     if tipo_voto == 'favor':
@@ -450,22 +494,42 @@ def cria_mat_adj_votos(df_parlamentares, df_materias_comum, parlamentares, mater
                 A[i,index_parlamentar] += 1
     return A
 
-def filtra_mat_adj_votos(A, parlamentares):
-    parlamentares_filtro = parlamentares.copy()
+def filtra_mat_adj_votos(A, df_parlamentares):
+    df_parlamentares_filtro = df_parlamentares.copy()
     counter = 0
     while counter < A.shape[0]:
-        if np.all((A[counter,:counter] == 0)) and np.all((A[counter,counter+1:] == 0)) \
-        and np.all((A[:counter,counter] == 0)) and np.all((A[counter+1:,counter] == 0)):
+        if np.all(A[counter,:counter] == 0) and np.all(A[counter,counter+1:] == 0) \
+        and np.all(A[:counter,counter] == 0) and np.all(A[counter+1:,counter] == 0):
             A = np.delete(A, counter, 0)
             A = np.delete(A, counter, 1)
-            del parlamentares_filtro[counter]
+            df_parlamentares_filtro = df_parlamentares_filtro.drop(df_parlamentares_filtro.index[counter], axis=0)
             counter = counter-1
         counter += 1
-    return A, parlamentares_filtro
+    return A, df_parlamentares_filtro
 
-def filtra_df_parlamentares(df_parlamentares, parlamentares_filtro):
+def filtra_mat_adj_bipartido(A, df_parlamentares, df_materias):
+    df_parlamentares_filtro = df_parlamentares.copy()
+    df_materias_filtro = df_materias.copy()
+    counter = 0
+    print('tam mat antes', A.shape[0])
+    while counter < A.shape[0]:
+        if np.all(A[counter,:counter] == 0) and np.all(A[counter,counter+1:] == 0) \
+        and np.all(A[:counter,counter] == 0) and np.all(A[counter+1:,counter] == 0):
+            A = np.delete(A, counter, 0)
+            A = np.delete(A, counter, 1)
+            if counter >= len(df_parlamentares_filtro):
+                df_materias_filtro = df_materias_filtro.drop(df_materias_filtro.index[counter%len(df_parlamentares_filtro)], axis=0)
+            else:
+                df_parlamentares_filtro = df_parlamentares_filtro.drop(df_parlamentares_filtro.index[counter], axis=0)
+            counter = counter-1
+        counter += 1
+    print('tam mat depois', A.shape[0])
+    return A, df_parlamentares_filtro, df_materias_filtro
+
+def filtra_dfs_bipartido(df_parlamentares, parlamentares_filtro, df_materias, materias_filtro):
     df_parlamentares = df_parlamentares[df_parlamentares['cod'].isin(parlamentares_filtro)]
-    return df_parlamentares
+    df_materias = df_materias[df_materias['cod'].isin(materias_filtro)]
+    return df_parlamentares, df_materias
 
 def colore_por_afastamento(df_parlamentares):
     colors_node = []
@@ -566,7 +630,9 @@ def plotta_grafo(edge_trace, node_trace):
                     )
     return fig'''
 
-def cria_grafo_bipartido(df_parlamentares, df_materias, parlamentares, materias, tipo_voto):
+def cria_grafo_bipartido(df_parlamentares, df_materias, tipo_voto):
+    parlamentares = df_parlamentares['cod'].tolist()
+    materias = df_materias['cod'].tolist()
     if tipo_voto == 'favor-bipartido':
         tipo_voto = 'votos_favor'
     elif tipo_voto == 'contra-bipartido':
@@ -596,15 +662,11 @@ def cria_grafo_bipartido(df_parlamentares, df_materias, parlamentares, materias,
 
 
 def filtrar_por_ano(df_info, ano):
-    df_ano = df_info.loc[df_info['ano_votacao'] == ano]
-    ret = df_ano['cod'].tolist()
-    return ret
+    return df_info.loc[df_info['ano_votacao'] == ano]
 
 
 def filtrar_por_mandato(df_info, ano):
-    df_ano = df_info.loc[(df_info['ano_votacao'] >= ano) & (df_info['ano_votacao'] <= ano+3)]
-    ret = df_ano['cod'].tolist()
-    return ret
+    return df_info.loc[(df_info['ano_votacao'] >= ano) & (df_info['ano_votacao'] <= ano+3)]
 
 
 def analisar_grafo(graph, metrica, atributo=None):
@@ -1154,17 +1216,19 @@ def plotta_grafo_bipartido(edge_trace, node_trace_senadores, node_trace_materias
      State('senadores-checklist', 'value'),
      State('partidos-checklist', 'value'),
      State('alinhamentos-checklist', 'value'),
+     State('materias-checklist', 'value'),
      State('filtrar-tempo', 'value'),
      State('selecao-ano', 'value'),
      State('selecao-mandato', 'value'),
      State('selecao-analise', 'value'),]
 )
 def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtrar_senadores, senadores_checklist,\
-                   partidos_checklist, alinhamentos_checklist, filtrar_tempo, filtro_ano, filtro_mandato,\
+                   partidos_checklist, alinhamentos_checklist, materias_checklist, filtrar_tempo, filtro_ano, filtro_mandato,\
                    metrica_analise):
     #if n_cliques == 0:
     #    return
     print("gerando rede")
+
     if filtro_senadores == 'customizar':
         df_parlamentares_filtro = filtra_senadores_custom(senadores_checklist)
     elif filtro_senadores == 'partido':
@@ -1173,20 +1237,25 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
         df_parlamentares_filtro = filtra_senadores_alinhamento(alinhamentos_checklist)
     else:
         df_parlamentares_filtro = global_store(filtro_senadores)
-    parlamentares_filtro, materias_comum, materias = extrai_listas(df_parlamentares_filtro, df_materias_comum, df_materias)
-    
+
+    df_materias_comum_filtro = global_store_materias_comum()
+    df_materias_filtro = global_store_materias()
+
+    if materias_checklist is not None:
+        df_materias_comum_filtro = filtra_materias_subtipo(df_materias_comum_filtro, materias_checklist)
+        df_materias_filtro = filtra_materias_subtipo(df_materias_filtro, materias_checklist)
+
     if tipo_rede == 'favor' or tipo_rede == 'contra':
         # Filtro temportal
         if filtrar_tempo == 'tempo-ano':
-            materias_comum = filtrar_por_ano(df_materias_comum, filtro_ano)
+            df_materias_comum_filtro = filtrar_por_ano(df_materias_comum_filtro, filtro_ano)
         elif filtrar_tempo == 'tempo-mandato':
-            materias_comum = filtrar_por_mandato(df_materias_comum, filtro_mandato)
+            df_materias_comum_filtro = filtrar_por_mandato(df_materias_comum_filtro, filtro_mandato)
         
-        A = cria_mat_adj_votos(df_parlamentares_filtro, df_materias_comum, parlamentares_filtro, materias_comum, tipo_rede)
+        A = cria_mat_adj_votos(df_parlamentares_filtro, df_materias_comum_filtro, tipo_rede)
         
         if filtrar_senadores is not None and len(filtrar_senadores) > 0 and filtrar_senadores[0] == 'filtrar':
-            A, parlamentares_filtro = filtra_mat_adj_votos(A, parlamentares_filtro)
-            df_parlamentares_filtro = filtra_df_parlamentares(df_parlamentares_filtro, parlamentares_filtro)
+            A, df_parlamentares_filtro = filtra_mat_adj_votos(A, df_parlamentares_filtro)
         G = nx.from_numpy_matrix(A)
         
         df_parlamentares_filtro, df_arestas = converte_grafo_df(G, df_parlamentares_filtro)
@@ -1203,21 +1272,21 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
     elif tipo_rede == 'favor-bipartido' or tipo_rede == 'contra-bipartido':
         # Filtro temportal
         if filtrar_tempo == 'tempo-ano':
-            materias = filtrar_por_ano(df_materias, filtro_ano)
+            df_materias_filtro = filtrar_por_ano(df_materias_filtro, filtro_ano)
         elif filtrar_tempo == 'tempo-mandato':
-            materias = filtrar_por_mandato(df_materias, filtro_mandato)
+            df_materias_filtro = filtrar_por_mandato(df_materias_filtro, filtro_mandato)
 
-        G = cria_grafo_bipartido(df_parlamentares_filtro, df_materias, parlamentares_filtro, materias, tipo_rede)
+        G = cria_grafo_bipartido(df_parlamentares_filtro, df_materias_filtro, tipo_rede)
 
         # FIXME: Nao funcionou o filtro de conexoes apenas copiando. Verificar erro
-        #if filtrar_senadores is not None and len(filtrar_senadores) > 0 and filtrar_senadores[0] == 'filtrar':
-        #    A = nx.adjacency_matrix(G)
-        #    A, parlamentares_filtro = filtra_#mat_adj_votos(A, parlamentares_filtro)
-        #    df_parlamentares_filtro = filtra_df_parlamentares(df_parlamentares_filtro, parlamentares_filtro)
-        #    G = nx.from_numpy_matrix(A)
+        if filtrar_senadores is not None and len(filtrar_senadores) > 0 and filtrar_senadores[0] == 'filtrar':
+            A = nx.adjacency_matrix(G)
+            A = A.todense()
+            A, df_parlamentares_filtro, df_materias_filtro = filtra_mat_adj_bipartido(A, df_parlamentares_filtro, df_materias_filtro)
+            G = nx.from_numpy_matrix(A)
 
         pos = cria_pos_bipartido(G)
-        edge_trace, node_trace_senadores, node_trace_materias = cria_trace_bipartido(G, df_parlamentares_filtro, df_materias, pos, coloracao_nos)
+        edge_trace, node_trace_senadores, node_trace_materias = cria_trace_bipartido(G, df_parlamentares_filtro, df_materias_filtro, pos, coloracao_nos)
         fig = plotta_grafo_bipartido(edge_trace, node_trace_senadores, node_trace_materias)
         analise = []
         
