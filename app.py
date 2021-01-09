@@ -284,7 +284,7 @@ app.layout = html.Div([
                         placeholder='Métrica Analisada'
                     )
                 ],
-                style={'display': 'inline-block', 'float': 'left', 'width': '79%', 'height': '99%', 'overflow-y': 'scroll'}),
+                style={'display': 'inline-block', 'float': 'left', 'width': '79%', 'height': '99%'}),
             ],
             style={'display': 'none', 'float': 'bottom', 'height': '200px', 'backgroundColor': 'rgb(250, 250, 250)'}),
         ],
