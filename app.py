@@ -391,7 +391,8 @@ def toggle_select_metric(filtro):
     Output('hidden-div-materias','style'),
     Input('filtrar-materias', 'value'))
 def toggle_custom_materias(filtro):
-    if filtro is not None and filtro[0] == 'filtrar':
+    print('filtro', filtro)
+    if filtro is not None and len(filtro) > 0:
         return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '10px'}
     else:
         return {'width': '49%', 'float': 'right', 'display': 'none'}
