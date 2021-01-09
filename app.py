@@ -1373,16 +1373,11 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
 
         G = cria_grafo_bipartido(df_parlamentares_filtro, df_materias_filtro, tipo_rede)
 
-        #print('nos G antes', G.nodes())
-        #print('parlamentares', df_parlamentares_filtro['cod'].tolist())
-
         if filtrar_senadores is not None and len(filtrar_senadores) > 0 and filtrar_senadores[0] == 'filtrar':
             A = nx.adjacency_matrix(G)
             A = A.todense()
             A, df_parlamentares_filtro, df_materias_filtro = filtra_mat_adj_bipartido(A, df_parlamentares_filtro, df_materias_filtro)
-            G = nx.from_numpy_matrix(A)
-            #print('nos G depois', G.nodes())
-
+            G = cria_grafo_bipartido(df_parlamentares_filtro, df_materias_filtro, tipo_rede)
 
         pos = cria_pos_bipartido(G)
         edge_trace, node_trace_senadores, node_trace_materias = cria_trace_bipartido(G, df_parlamentares_filtro, df_materias_filtro, pos, coloracao_nos)
