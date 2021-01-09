@@ -16,6 +16,7 @@ import plotly.graph_objects as go
 import networkx as nx
 import pickle
 import json as js
+from addEdge import addEdge
 
 from analises import *
 
@@ -391,7 +392,6 @@ def toggle_select_metric(filtro):
     Output('hidden-div-materias','style'),
     Input('filtrar-materias', 'value'))
 def toggle_custom_materias(filtro):
-    print('filtro', filtro)
     if filtro is not None and len(filtro) > 0:
         return {'width': '49%', 'display': 'inline-block', 'float': 'right', 'display': 'block', 'height': '10px'}
     else:
@@ -1009,12 +1009,17 @@ def cria_trace(df_parlamentares, df_arestas, cores, ano=None):
         y0 = df_parlamentares.iloc[df_arestas.iloc[i]['id_entrada']]['pos_y']
         x1 = df_parlamentares.iloc[df_arestas.iloc[i]['id_saida']]['pos_x']
         y1 = df_parlamentares.iloc[df_arestas.iloc[i]['id_saida']]['pos_y']
-        edge_x.append(x0)
+        inicio = [x0, y0]
+        fim = [x1, y1]
+        if inicio == fim:
+            continue
+        edge_x, edge_y = addEdge(inicio, fim, edge_x, edge_y, .8, 'end', .04, 30)
+        '''edge_x.append(x0)
         edge_x.append(x1)
         edge_x.append(None)
         edge_y.append(y0)
         edge_y.append(y1)
-        edge_y.append(None)
+        edge_y.append(None)'''
 
     edge_trace = go.Scatter(
         x=edge_x, y=edge_y,
