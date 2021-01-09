@@ -15,7 +15,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import networkx as nx
 import pickle
-import json
+import json as js
 
 from analises import *
 
@@ -68,13 +68,15 @@ df_parlamentares = limpa_colunas(df_parlamentares, 'votos_favor')
 df_parlamentares = limpa_colunas(df_parlamentares, 'votos_contra')
 df_materias_comum = limpa_colunas(df_materias_comum, 'outros_autores')
 
-tipos_rede = [{'label': 'Votos a Favor', 'value': 'favor'}, {'label': 'Votos Contra', 'value': 'contra'}, \
-            {'label': 'Votos a Favor (Bipartido)', 'value': 'favor-bipartido'}, {'label': 'Votos Contra (Bipartido)', 'value': 'contra-bipartido'}]
-filtros_senadores = [{'label': 'Todos', 'value': 'todos'}, {'label': 'Somente Ativos', 'value': 'ativos'}, \
-                     {'label': 'Somente Afastados', 'value': 'afastados'}, {'label': 'Partido', 'value': 'partido'},\
+tipos_rede = [{'label': 'Votos a Favor', 'value': 'favor'},
+              {'label': 'Votos Contra', 'value': 'contra'},
+              {'label': 'Votos a Favor (Bipartido)', 'value': 'favor-bipartido'},
+              {'label': 'Votos Contra (Bipartido)', 'value': 'contra-bipartido'}]
+filtros_senadores = [{'label': 'Todos', 'value': 'todos'}, {'label': 'Somente Ativos', 'value': 'ativos'},
+                     {'label': 'Somente Afastados', 'value': 'afastados'}, {'label': 'Partido', 'value': 'partido'},
                      {'label': 'Alinhamento ao Governo', 'value': 'alinhamento'}, {'label': 'Customizar', 'value': 'customizar'}]
-cores_nos = [{'label': 'Ativo/Afastado', 'value': 'ativo'}, {'label': 'Partido', 'value': 'partido'},\
-             {'label': 'Alinhamento ao Governo', 'value': 'alinhamento'}, {'label': 'Número de Conexões', 'value': 'conexoes'}]
+cores_nos = [{'label': 'Ativo/Afastado', 'value': 'ativo'}, {'label': 'Partido', 'value': 'partido'},]
+             #{'label': 'Alinhamento ao Governo', 'value': 'alinhamento'}, {'label': 'Número de Conexões', 'value': 'conexoes'}]
 metricas_analise = [{'label': "Nenhuma",                        'value': 'analise-nenhuma'},
                     {'label': "Grau",                           'value': 'analise-grau'},
                     {'label': "Componentes Conexas",            'value': 'analise-connect'},
@@ -90,6 +92,38 @@ mostrar_tempo = [{'label': 'Nenhum', 'value':'tempo-todos'},
 anos = [{'label':str(i), 'value':i} for i in range(1991,2021)]
 mandatos_eleitorais = [{'label':'{} - {}'.format(i, i+3), 'value':i} for i in range(1991,2021,4)]
 #[{'label': 'Todos', 'value':'mandato-todos'}]
+cores_partidos = {
+    'PDT' : px.colors.qualitative.Alphabet[0],
+    'CIDADANIA' : px.colors.qualitative.Alphabet[1],
+    'PODEMOS' : px.colors.qualitative.Alphabet[2],
+    'PV': px.colors.qualitative.Alphabet[3],
+    'PSD' : px.colors.qualitative.Alphabet[4],
+    'PP' : px.colors.qualitative.Alphabet[5],
+    'MDB' : px.colors.qualitative.Alphabet[6],
+    'DEM' : px.colors.qualitative.Alphabet[7],
+    'REDE' : px.colors.qualitative.Alphabet[8],
+    'PROS' : px.colors.qualitative.Alphabet[9],
+    'REPUBLICANOS' : px.colors.qualitative.Alphabet[10],
+    'PT' : px.colors.qualitative.Alphabet[11],
+    'PSDB' : px.colors.qualitative.Alphabet[12],
+    'PL' : px.colors.qualitative.Alphabet[13],
+    'PSB' : px.colors.qualitative.Alphabet[14],
+    'PSL' : px.colors.qualitative.Alphabet[15],
+    'PSC' : px.colors.qualitative.Alphabet[16],
+    'PTB' : px.colors.qualitative.Alphabet[17],
+    'SOLIDARIEDADE' : px.colors.qualitative.Alphabet[18],
+    'PSOL' : px.colors.qualitative.Alphabet[19],
+    'PMN' : px.colors.qualitative.Alphabet[20],
+    'PHS' : px.colors.qualitative.Alphabet[21],
+    'DC': px.colors.qualitative.Alphabet[22],
+    'PSDC': px.colors.qualitative.Alphabet[23],
+    'PPB': px.colors.qualitative.Alphabet[24],
+    'PPR': px.colors.qualitative.Alphabet[25],
+    'PMB': px.colors.qualitative.Set3[0],
+    'PRTB': px.colors.qualitative.Set3[1],
+    'PFL': px.colors.qualitative.Set3[2],
+    'S/Partido' : 'black',
+}
 
 app.layout = html.Div([
     html.Div([
@@ -543,16 +577,58 @@ def colore_por_afastamento(df_parlamentares):
             colors_dict[i] = "Ativo"
     return colors_node, colors_dict
 
-def colore_por_atributo(df_parlamentares, coloracao_nos):
+def colore_por_partido(tab_parlamentares, ano):
     colors_node = []
     colors_dict = {}
-    if coloracao_nos == 'ativo':
-        for i in range(len(df_parlamentares)):
-            if df_parlamentares.iloc[i].afastado == 'Sim': #(df_parlamentares.afastado == "Sim").all():
-                colors_node.append('red')       # darksalmon
-            else:
-                colors_node.append('green')     # darkblue
-    return colors_node
+
+    for i in range(len(tab_parlamentares)):
+        partido = get_curr_partido(tab_parlamentares.iloc[i].filiacoes, ano)
+        colors_node.append(cores_partidos[partido])
+        colors_dict[i] = partido
+
+    return colors_node, colors_dict
+
+def get_curr_partido(filiacoes, ano):
+    codigo = None
+
+    for filiacao in filiacoes:
+        jsstr = filiacao.replace("\'", "\"")
+        jsstr = jsstr.replace("None", "\"None\"")
+
+        fil = js.loads(jsstr)
+
+        if int(fil['data_filiacao'][:4]) <= ano:
+            termino = fil['data_desfiliacao']
+            if termino == 'None':
+                # Achei o partido!
+                codigo = int(fil['cod'])
+                break
+
+            if int(termino[:4]) > ano:
+                codigo = int(fil['cod'])
+                break
+
+    if not codigo:
+        return 'S/Partido'
+
+    partido = df_partidos[df_partidos['cod'] == codigo]
+    partido = partido['sigla'].iloc[0]
+
+    return partido
+
+
+#def colore_por_atributo(df_parlamentares, coloracao_nos):
+#    colors_node = []
+#    colors_dict = {}
+#    if coloracao_nos == 'ativo':
+#        for i in range(len(df_parlamentares)):
+#            if df_parlamentares.iloc[i].afastado == 'Sim': #(df_parlamentares.afastado == "Sim").all():
+#                colors_node.append('red')       # darksalmon
+#            else:
+#                colors_node.append('green')     # darkblue
+#    if coloracao_nos == 'partido':
+#        return colore_por_partido(df_parlamentares, )
+#    return colors_node
 
 '''def cria_trace(G, df_parlamentares, cores):
     pos = nx.circular_layout(G) #nx.random_layout(G)
@@ -924,7 +1000,7 @@ def converte_grafo_df(G, df_parlamentares):
 
     return df_parlamentares, df_arestas
 
-def cria_trace(df_parlamentares, df_arestas, cores):
+def cria_trace(df_parlamentares, df_arestas, cores, ano=None):
     edge_x = []
     edge_y = []
     for i in range(len(df_arestas)):
@@ -976,29 +1052,31 @@ def cria_trace(df_parlamentares, df_arestas, cores):
                 titleside='right'
             ),
             line_width=2)
-    elif cores == 'ativo':
-        cores_dos_nos = colore_por_atributo(df_parlamentares, cores)
-        node_trace.marker=dict(
-            reversescale=True,
-            color=cores_dos_nos,
-            size=10,
-            line_width=2)
+
+    cores_dos_nos = cores
+    node_trace.marker=dict(
+        reversescale=True,
+        color=cores_dos_nos,
+        size=10,
+        line_width=2)
 
     node_text = []
 
-    if cores == 'conexoes':
-        node_adjacencies = []
+    node_adjacencies = []
 
     for adjacencias in df_parlamentares['adjacencias'].tolist():
         if cores == 'conexoes':
             node_adjacencies.append(len(adjacencias))
-        for node, adjacencies in enumerate(adjacencias):
-            node_text.append(str(df_parlamentares.iloc[node].tratamento) + \
-                            str(df_parlamentares.iloc[node].nome) )
-            if pd.isnull(df_parlamentares.iloc[node].email) == False:
-                node_text[-1] = node_text[-1] + \
-                                '<br>e-mail: ' + str(df_parlamentares.iloc[node].email)# + \
-                                #'<br>UF: ' + str(df_parlamentares.iloc[node].uf)
+    for node in range(len(df_parlamentares)):
+        node_text.append(str(df_parlamentares.iloc[node].tratamento) + \
+                         str(df_parlamentares.iloc[node].nome) )
+        if not pd.isnull(df_parlamentares.iloc[node].email):
+            node_text[-1] = node_text[-1] + \
+                            '<br>e-mail: ' + str(df_parlamentares.iloc[node].email)# + \
+                            #'<br>UF: ' + str(df_parlamentares.iloc[node].uf)
+            if ano:
+                partido = get_curr_partido(df_parlamentares.iloc[node].filiacoes, ano)
+                node_text[-1] += '<br>Partido: ' + partido
 
     if cores == 'conexoes':
         node_trace.marker.color = node_adjacencies
@@ -1259,13 +1337,24 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
         G = nx.from_numpy_matrix(A)
         
         df_parlamentares_filtro, df_arestas = converte_grafo_df(G, df_parlamentares_filtro)
-        edge_trace, node_trace = cria_trace(df_parlamentares_filtro, df_arestas, coloracao_nos)
-        
+
+        cores_dos_nos = None
+        ano = None
+
         if coloracao_nos == 'ativo':
             cores_dos_nos, atr_dict = colore_por_afastamento(df_parlamentares_filtro)
             if metrica_analise == 'analise-assortatividade':
                 nx.set_node_attributes(G, atr_dict, name="Ativo/Afastado")
-                
+
+        elif coloracao_nos == 'partido' and filtrar_tempo in ['tempo-ano', 'tempo-mandato']:
+            ano = filtro_ano
+            if filtrar_tempo == 'tempo-mandato':
+                ano = filtro_mandato
+            cores_dos_nos, atr_dict = colore_por_partido(df_parlamentares_filtro, ano)
+            if metrica_analise == 'analise-assortatividade':
+                nx.set_node_attributes(G, atr_dict, name="Partido")
+
+        edge_trace, node_trace = cria_trace(df_parlamentares_filtro, df_arestas, cores_dos_nos, ano)
         analise = analisar_grafo(G, metrica_analise, atributo="Ativo/Afastado")
         fig = plotta_grafo(edge_trace, node_trace)
         
