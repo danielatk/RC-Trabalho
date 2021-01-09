@@ -618,18 +618,18 @@ def get_curr_partido(filiacoes, ano):
     return partido
 
 
-#def colore_por_atributo(df_parlamentares, coloracao_nos):
-#    colors_node = []
-#    colors_dict = {}
-#    if coloracao_nos == 'ativo':
-#        for i in range(len(df_parlamentares)):
-#            if df_parlamentares.iloc[i].afastado == 'Sim': #(df_parlamentares.afastado == "Sim").all():
-#                colors_node.append('red')       # darksalmon
-#            else:
-#                colors_node.append('green')     # darkblue
-#    if coloracao_nos == 'partido':
-#        return colore_por_partido(df_parlamentares, )
-#    return colors_node
+def colore_por_atributo(df_parlamentares, coloracao_nos):
+    colors_node = []
+    colors_dict = {}
+    if coloracao_nos == 'ativo':
+        for i in range(len(df_parlamentares)):
+            if df_parlamentares.iloc[i].afastado == 'Sim': #(df_parlamentares.afastado == "Sim").all():
+                colors_node.append('red')       # darksalmon
+            else:
+                colors_node.append('green')     # darkblue
+    if coloracao_nos == 'partido':
+        return colore_por_partido(df_parlamentares, )
+    return colors_node
 
 '''def cria_trace(G, df_parlamentares, cores):
     pos = nx.circular_layout(G) #nx.random_layout(G)
@@ -734,7 +734,7 @@ def cria_grafo_bipartido(df_parlamentares, df_materias, tipo_voto):
             if materia not in materias:
                 continue
             index_materia = materias.index(materia)
-            G.add_edges_from([(i, index_materia)])
+            G.add_edges_from([(parlamentares[i], materias[index_materia])])
     return G
 
 
@@ -1341,7 +1341,7 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
         if filtrar_senadores is not None and len(filtrar_senadores) > 0 and filtrar_senadores[0] == 'filtrar':
             A, df_parlamentares_filtro = filtra_mat_adj_votos(A, df_parlamentares_filtro)
         G = nx.from_numpy_matrix(A)
-        
+
         df_parlamentares_filtro, df_arestas = converte_grafo_df(G, df_parlamentares_filtro)
 
         cores_dos_nos = None
@@ -1373,12 +1373,16 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
 
         G = cria_grafo_bipartido(df_parlamentares_filtro, df_materias_filtro, tipo_rede)
 
-        # FIXME: Nao funcionou o filtro de conexoes apenas copiando. Verificar erro
+        #print('nos G antes', G.nodes())
+        #print('parlamentares', df_parlamentares_filtro['cod'].tolist())
+
         if filtrar_senadores is not None and len(filtrar_senadores) > 0 and filtrar_senadores[0] == 'filtrar':
             A = nx.adjacency_matrix(G)
             A = A.todense()
             A, df_parlamentares_filtro, df_materias_filtro = filtra_mat_adj_bipartido(A, df_parlamentares_filtro, df_materias_filtro)
             G = nx.from_numpy_matrix(A)
+            #print('nos G depois', G.nodes())
+
 
         pos = cria_pos_bipartido(G)
         edge_trace, node_trace_senadores, node_trace_materias = cria_trace_bipartido(G, df_parlamentares_filtro, df_materias_filtro, pos, coloracao_nos)
