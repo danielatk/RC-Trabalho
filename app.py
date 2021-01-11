@@ -123,6 +123,7 @@ cores_partidos = {
     'PMB': px.colors.qualitative.Set3[0],
     'PRTB': px.colors.qualitative.Set3[1],
     'PFL': px.colors.qualitative.Set3[2],
+    'PTC': px.colors.qualitative.Set3[3],
     'S/Partido' : 'black',
 }
 
@@ -618,9 +619,8 @@ def get_curr_partido(filiacoes, ano):
     return partido
 
 
-def colore_por_atributo(df_parlamentares, coloracao_nos):
+def colore_por_atributo(df_parlamentares, coloracao_nos, ano=None):
     colors_node = []
-    colors_dict = {}
     if coloracao_nos == 'ativo':
         for i in range(len(df_parlamentares)):
             if df_parlamentares.iloc[i].afastado == 'Sim': #(df_parlamentares.afastado == "Sim").all():
@@ -628,7 +628,10 @@ def colore_por_atributo(df_parlamentares, coloracao_nos):
             else:
                 colors_node.append('green')     # darkblue
     if coloracao_nos == 'partido':
-        return colore_por_partido(df_parlamentares, )
+        if not ano:
+            print("WARNING: Voce tem que especificar ano para saber o partido")
+            ano = 2020
+        return colore_por_partido(df_parlamentares, ano)[0]
     return colors_node
 
 '''def cria_trace(G, df_parlamentares, cores):
@@ -1090,7 +1093,7 @@ def cria_trace(df_parlamentares, df_arestas, cores, ano=None):
 
     return edge_trace, node_trace
 
-def cria_trace_bipartido(G, df_parlamentares, df_materias, pos, cores):
+def cria_trace_bipartido(G, df_parlamentares, df_materias, pos, cores, ano=None):
     edge_x = []
     edge_y = []
     for edge in G.edges():
@@ -1127,7 +1130,7 @@ def cria_trace_bipartido(G, df_parlamentares, df_materias, pos, cores):
         mode='markers',
         hoverinfo='text')
 
-    if cores == 'conexoes':
+    if cores == 'conexoes': # FIXME
         node_trace_senadores.marker=dict(
             showscale=True,
             # colorscale options
@@ -1145,8 +1148,9 @@ def cria_trace_bipartido(G, df_parlamentares, df_materias, pos, cores):
                 titleside='right'
             ),
             line_width=2)
-    elif cores == 'ativo':
-        cores_dos_nos = colore_por_atributo(df_parlamentares, cores)
+
+    elif cores in ['ativo', 'partido']:
+        cores_dos_nos = colore_por_atributo(df_parlamentares, cores, ano)
         node_trace_senadores.marker=dict(
             reversescale=True,
             color=cores_dos_nos,
@@ -1159,6 +1163,7 @@ def cria_trace_bipartido(G, df_parlamentares, df_materias, pos, cores):
         hoverinfo='text',
         marker=dict(
             size=5,
+            color='blue',
             line_width=2))
 
     node_text_senadores = []
@@ -1166,9 +1171,11 @@ def cria_trace_bipartido(G, df_parlamentares, df_materias, pos, cores):
 
     node_adjacencies = []
 
+    nodeType = nx.get_node_attributes(G,'bipartite')
+
     for node, adjacencies in enumerate(G.adjacency()):
-        if node in nx.get_node_attributes(G,'bipartite'):
-            if nx.get_node_attributes(G,'bipartite')[node] == 0:
+        if node in nodeType.keys():
+            if nodeType[node] == 0:
                 if cores == 'afastado':
                     if df_parlamentares[df_parlamentares['cod'] == node].afastado.values[0] == 'Sim':
                         node_adjacencies.append(1)
@@ -1176,15 +1183,22 @@ def cria_trace_bipartido(G, df_parlamentares, df_materias, pos, cores):
                         node_adjacencies.append(2)
                 elif cores == 'conexoes':
                     node_adjacencies.append(len(adjacencies[1]))
-                node_text_senadores.append(str(df_parlamentares[df_parlamentares['cod'] == node].tratamento.values[0]) + \
-                                str(df_parlamentares[df_parlamentares['cod'] == node].nome.values[0]) )
-                if pd.isnull(df_parlamentares[df_parlamentares['cod'] == node].email.values[0]) == False:
-                    node_text_senadores[-1] = node_text_senadores[-1] + \
-                                    '<br>e-mail: ' + str(df_parlamentares[df_parlamentares['cod'] == node].email.values[0])
-            else:
-                node_text_materias.append('Subtipo da matéria: ' + str(df_materias[df_materias['cod'] == node].nome_subtipo.values[0]))
 
-    node_trace_senadores.marker.color = node_adjacencies
+    for node in G.nodes():
+        if nodeType[node] == 0: # é parlamentar
+            parlamentar = df_parlamentares[df_parlamentares['cod'] == node]
+            node_text_senadores.append(str(parlamentar.tratamento.values[0]) +
+                                       str(parlamentar.nome.values[0]) )
+            if not pd.isnull(parlamentar.email.values[0]):
+                node_text_senadores[-1] = node_text_senadores[-1] + \
+                                          '<br>e-mail: ' + str(parlamentar.email.values[0])
+                if ano:
+                    partido = get_curr_partido(parlamentar.filiacoes.values[0], ano)
+                    node_text_senadores[-1] += '<br>Partido: ' + partido
+        else: # é matéria
+            node_text_materias.append('Subtipo da matéria: ' + str(df_materias[df_materias['cod'] == node].nome_subtipo.values[0]))
+
+
     node_trace_senadores.text = node_text_senadores
     node_trace_materias.text = node_text_materias
 
@@ -1273,19 +1287,19 @@ def plotta_grafo(edge_trace, node_trace):
 
 def plotta_grafo_bipartido(edge_trace, node_trace_senadores, node_trace_materias):
     fig = go.Figure(data=[edge_trace, node_trace_senadores, node_trace_materias],
-                layout=go.Layout(
-                    title='<br>Rede de Votações de Matérias de Parlamentares',
-                    titlefont_size=16,
-                    showlegend=False,
-                    hovermode='closest',
-                    margin=dict(b=20,l=5,r=5,t=40),
-                    #annotations=[ dict(
-                    #    showarrow=False,
-                    #    xref="paper", yref="paper",
-                    #    x=0.005, y=-0.002 ) ],
-                    height=750,
-                    xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                    yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
+                    layout=go.Layout(
+                        title='<br>Rede de Votações de Matérias de Parlamentares',
+                        titlefont_size=16,
+                        showlegend=False,
+                        hovermode='closest',
+                        margin=dict(b=20,l=5,r=5,t=40),
+                        #annotations=[ dict(
+                        #    showarrow=False,
+                        #    xref="paper", yref="paper",
+                        #    x=0.005, y=-0.002 ) ],
+                        height=750,
+                        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
                     )
     return fig
 
@@ -1335,9 +1349,9 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
             df_materias_comum_filtro = filtrar_por_ano(df_materias_comum_filtro, filtro_ano)
         elif filtrar_tempo == 'tempo-mandato':
             df_materias_comum_filtro = filtrar_por_mandato(df_materias_comum_filtro, filtro_mandato)
-        
+
         A = cria_mat_adj_votos(df_parlamentares_filtro, df_materias_comum_filtro, tipo_rede)
-        
+
         if filtrar_senadores is not None and len(filtrar_senadores) > 0 and filtrar_senadores[0] == 'filtrar':
             A, df_parlamentares_filtro = filtra_mat_adj_votos(A, df_parlamentares_filtro)
         G = nx.from_numpy_matrix(A)
@@ -1363,7 +1377,7 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
         edge_trace, node_trace = cria_trace(df_parlamentares_filtro, df_arestas, cores_dos_nos, ano)
         analise = analisar_grafo(G, metrica_analise, atributo="Ativo/Afastado")
         fig = plotta_grafo(edge_trace, node_trace)
-        
+
     elif tipo_rede == 'favor-bipartido' or tipo_rede == 'contra-bipartido':
         # Filtro temportal
         if filtrar_tempo == 'tempo-ano':
@@ -1379,8 +1393,14 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
             A, df_parlamentares_filtro, df_materias_filtro = filtra_mat_adj_bipartido(A, df_parlamentares_filtro, df_materias_filtro)
             G = cria_grafo_bipartido(df_parlamentares_filtro, df_materias_filtro, tipo_rede)
 
+        ano = None
+        if filtrar_tempo == 'tempo-ano':
+            ano = filtro_ano
+        elif filtrar_tempo == 'tempo-mandato':
+            ano = filtro_mandato
+
         pos = cria_pos_bipartido(G)
-        edge_trace, node_trace_senadores, node_trace_materias = cria_trace_bipartido(G, df_parlamentares_filtro, df_materias_filtro, pos, coloracao_nos)
+        edge_trace, node_trace_senadores, node_trace_materias = cria_trace_bipartido(G, df_parlamentares_filtro, df_materias_filtro, pos, coloracao_nos, ano)
         fig = plotta_grafo_bipartido(edge_trace, node_trace_senadores, node_trace_materias)
         analise = []
         
