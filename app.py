@@ -195,7 +195,7 @@ app.layout = html.Div([
                     searchable=True
                 )
                 # FIXME: Não estão aparecendo as opções!
-            ],style={'width': '59%', 'display': 'inline-block', 'overflow-y': 'scroll'}),
+            ],style={'width': '59%', 'height': '300px', 'display': 'inline-block'}),
         ],
         style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '50px', 'backgroundColor': 'rgb(250, 250, 250)'}),
 
@@ -208,7 +208,7 @@ app.layout = html.Div([
                     value=mandatos_eleitorais[-1]['value'],
                     placeholder='Mandato Eleitoral'
                 )
-            ],style={'width': '59%', 'height': '300px', 'display': 'inline-block', 'overflow-y': 'scroll'}),
+            ],style={'width': '59%', 'height': '300px', 'display': 'inline-block'}),
         ],
         style={'width': '49%', 'float': 'right', 'display': 'none', 'height': '50px', 'backgroundColor': 'rgb(250, 250, 250)'}),
         
