@@ -17,6 +17,10 @@ import networkx as nx
 import pickle
 import json as js
 from addEdge import addEdge
+import scipy.spatial.distance as ssd
+from scipy.cluster.hierarchy import dendrogram, linkage
+from matplotlib import pyplot as plt
+from sklearn.manifold import MDS
 
 from analises import *
 
@@ -546,7 +550,6 @@ def filtra_mat_adj_bipartido(A, df_parlamentares, df_materias):
     df_parlamentares_filtro = df_parlamentares.copy()
     df_materias_filtro = df_materias.copy()
     counter = 0
-    print('tam mat antes', A.shape[0])
     while counter < A.shape[0]:
         if np.all(A[counter,:counter] == 0) and np.all(A[counter,counter+1:] == 0) \
         and np.all(A[:counter,counter] == 0) and np.all(A[counter+1:,counter] == 0):
@@ -558,7 +561,6 @@ def filtra_mat_adj_bipartido(A, df_parlamentares, df_materias):
                 df_parlamentares_filtro = df_parlamentares_filtro.drop(df_parlamentares_filtro.index[counter], axis=0)
             counter = counter-1
         counter += 1
-    print('tam mat depois', A.shape[0])
     return A, df_parlamentares_filtro, df_materias_filtro
 
 def filtra_dfs_bipartido(df_parlamentares, parlamentares_filtro, df_materias, materias_filtro):
@@ -1289,6 +1291,124 @@ def plotta_grafo_bipartido(edge_trace, node_trace_senadores, node_trace_materias
                     )
     return fig
 
+#ATENÇÃO! PODE DAR PROBLEMA CASO TENHA MATERIA E PARLAMENTAR COM MESMO CÓDIGO
+def calcula_adamic(G, df_parlamentares):
+    parlamentares = df_parlamentares['cod'].tolist()
+    n = len(parlamentares)
+    S = np.zeros((n,n))
+    terminou = False
+    for node1, adjacencies1 in enumerate(G.adjacency()):
+        for node2, adjacencies2 in enumerate(G.adjacency()):
+            if node1 == len(parlamentares):
+                terminou = True
+                break
+            if node2 == len(parlamentares):
+                break
+            adjacencias1 = adjacencies1[1]
+            adjacencias2 = adjacencies2[1]
+            lista_adj1 = []
+            lista_adj2 = []
+            for adj in adjacencias1:
+                lista_adj1.append(adj)
+            for adj in adjacencias2:
+                lista_adj2.append(adj)
+            intersecao = list(set(lista_adj1).intersection(lista_adj2))
+            sim = 0
+            for node in intersecao:
+                sim += 1/np.log(G.degree[node])
+            S[node1,node2] = sim
+            S[node2,node1] = sim
+        if terminou == True:
+            break
+    return S
+
+#ATENÇÃO! PODE DAR PROBLEMA CASO TENHA MATERIA E PARLAMENTAR COM MESMO CÓDIGO
+def calcula_sim_cos(G, df_parlamentares):
+    parlamentares = df_parlamentares['cod'].tolist()
+    n = len(parlamentares)
+    S = np.zeros((n,n))
+    terminou = False
+    for node1, adjacencies1 in enumerate(G.adjacency()):
+        for node2, adjacencies2 in enumerate(G.adjacency()):
+            if node1 == len(parlamentares):
+                terminou = True
+                break
+            if node2 == len(parlamentares):
+                break
+            adjacencias1 = adjacencies1[1]
+            adjacencias2 = adjacencies2[1]
+            lista_adj1 = []
+            lista_adj2 = []
+            for adj in adjacencias1:
+                lista_adj1.append(adj)
+            for adj in adjacencias2:
+                lista_adj2.append(adj)
+            intersecao = list(set(lista_adj1).intersection(lista_adj2))
+            S[node1,node2] = len(intersecao)/(np.sqrt(G.degree[parlamentares[node1]]) * np.sqrt(G.degree[parlamentares[node2]]))
+            S[node2,node1] = S[node1,node2]
+        if terminou == True:
+            break
+    return S
+
+def converte_sim_dist(S):
+    n = S.shape[0]
+    D = np.zeros((n,n))
+    for i in range(n):
+        for j in range(i, n):
+            D[i,j] = 2*(1 - S[i,j])
+            D[j,i] = D[i,j]
+    return D
+
+def aplica_modelo(G, df_parlamentares):
+    parlamentares = df_parlamentares['nome'].tolist()
+
+    S_adamic = calcula_adamic(G, df_parlamentares)
+    S_cos = calcula_sim_cos(G, df_parlamentares)
+    D_cos = converte_sim_dist(S_cos)
+
+    #deixar as distancias na diagonal igual a zero (tem alguns que estão 10^-16)
+    for i in range(D_cos.shape[0]):
+        D_cos[i,i] = 0
+
+    # convert the redundant n*n square matrix form into a condensed nC2 array
+    D_cos_flat = ssd.squareform(D_cos) # distArray[{n choose 2}-{n-i choose 2} + (j-i-1)] is the distance between points i and j
+
+    embedding = MDS(n_components=2, dissimilarity='precomputed')
+    X = embedding.fit_transform(D_cos)
+
+    fig1 = plt.figure(facecolor='white')
+    ax1 = plt.axes()
+    ax1.axhline(y=0, color='k')
+    ax1.axvline(x=0, color='k')
+    plt.scatter(X[:,0], X[:,1], color='b')
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    for i, txt in enumerate(parlamentares):
+        ax1.annotate(txt, (X[i,0], X[i,1]), fontsize=14)
+    #plt.ylabel("PC2 (" + str(int(100*explained_var[indexes[1]])) + "% variância explicada)", fontsize=18)
+    #plt.xlabel("PC1 (" + str(int(100*explained_var[indexes[0]])) + "% variância explicada)", fontsize=18)
+    #plt.tight_layout()
+    plt.show()
+
+    criterios = ['single', 'complete', 'average', 'weighted', 'centroid', 'median', 'ward']
+
+    for criterio in criterios:
+        Z = linkage(D_cos_flat, criterio)
+        fig = plt.figure(figsize=(25, 10))
+        dn = dendrogram(Z, labels=parlamentares)
+        folhas = dn['leaves']
+        y_pos = np.arange(len(folhas))
+        bars = []
+        for folha in folhas:
+            bars.append(parlamentares[folha])
+        #plt.xticks(y_pos, bars, fontsize=12, rotation=90)
+        plt.yticks(fontsize=12)
+        plt.xlabel("Parlamentares", fontsize=18)
+        #plt.ylabel("Valor", fontsize=18)
+        plt.title('Dendograma de Clusterização Hierárquica com critério ' + criterio)
+        #plt.tight_layout()
+        plt.show()
+
 @app.callback(
     [Output('graph', 'figure'),
      Output('detalhes-analises', 'children')],
@@ -1328,6 +1448,23 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
     if materias_checklist is not None:
         df_materias_comum_filtro = filtra_materias_subtipo(df_materias_comum_filtro, materias_checklist)
         df_materias_filtro = filtra_materias_subtipo(df_materias_filtro, materias_checklist)
+
+    #--------------TIRAR ESSA PARTE (SÓ PRA CHECAR SE TEM MSM CODIGO DE PARLAMENTAR E MATÉRIA)---------------
+
+    '''codigos_iguais = list(set(df_materias_filtro['cod'].tolist()).intersection(df_parlamentares_filtro['cod'].tolist()))
+    print('codigos iguais', codigos_iguais)
+
+    indices_parl = []
+    indices_mat = []
+
+    for cod in codigos_iguais:
+        indices_parl.append(df_parlamentares_filtro['cod'].tolist().index(cod))
+        indices_mat.append(df_materias_filtro['cod'].tolist().index(cod))
+
+    print('indices codigos iguais parl', indices_parl)
+    print('indices codigos iguais mat', indices_mat)'''
+
+    #--------------FIM DA PARTE---------------
 
     if tipo_rede == 'favor' or tipo_rede == 'contra':
         # Filtro temportal
@@ -1378,6 +1515,18 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
             A = A.todense()
             A, df_parlamentares_filtro, df_materias_filtro = filtra_mat_adj_bipartido(A, df_parlamentares_filtro, df_materias_filtro)
             G = cria_grafo_bipartido(df_parlamentares_filtro, df_materias_filtro, tipo_rede)
+
+        '''for cod in codigos_iguais:
+            if cod in df_parlamentares_filtro['cod'].tolist():
+                print('cod igual ' + str(cod) + ' em parl')
+            if cod in df_materias_filtro['cod'].tolist():
+                print('cod igual ' + str(cod) + ' em mat')'''
+
+        #----------INÍCIO SESSÃO ANÁLISE-----------#
+
+        #aplica_modelo(G, df_parlamentares_filtro)
+
+        #----------FIM SESSÃO ANÁLISE-----------#
 
         pos = cria_pos_bipartido(G)
         edge_trace, node_trace_senadores, node_trace_materias = cria_trace_bipartido(G, df_parlamentares_filtro, df_materias_filtro, pos, coloracao_nos)
