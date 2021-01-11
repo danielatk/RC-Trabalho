@@ -1373,7 +1373,7 @@ def converte_sim_dist(S):
             D[j,i] = D[i,j]
     return D
 
-def aplica_modelo(G, df_parlamentares):
+def aplica_modelo(G, df_parlamentares, ano):
     parlamentares = df_parlamentares['nome'].tolist()
 
     S_adamic = calcula_adamic(G, df_parlamentares)
@@ -1390,15 +1390,33 @@ def aplica_modelo(G, df_parlamentares):
     embedding = MDS(n_components=2, dissimilarity='precomputed')
     X = embedding.fit_transform(D_cos)
 
+    dic_cores = {
+        'Esquerda Conservadora' : 'firebrick',
+        'Esquerda Progressista' : 'orangered',
+        'Direita Conservadora' : 'midnightblue',
+        'Direita Progressista' : 'aqua'
+    }
+
+    cores = []
+
+    for i in range(len(parlamentares)):
+        parl = df_parlamentares.iloc[i]['cod']
+        fil = df_parlamentares.iloc[i].filiacoes
+        partido = get_curr_partido(fil, ano)
+        pos = df_partidos[df_partidos['sigla'] == partido]['posicionamento'].values[0]
+        cor = dic_cores[pos]
+        cores.append(cor)
+
     fig1 = plt.figure(facecolor='white')
     ax1 = plt.axes()
     ax1.axhline(y=0, color='k')
     ax1.axvline(x=0, color='k')
-    plt.scatter(X[:,0], X[:,1], color='b')
+    plt.scatter(X[:,0], X[:,1], color=cores, label=cores)
+    #plt.legend()
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-    for i, txt in enumerate(parlamentares):
-        ax1.annotate(txt, (X[i,0], X[i,1]), fontsize=14)
+    #for i, txt in enumerate(parlamentares):
+    #    ax1.annotate(txt, (X[i,0], X[i,1]), fontsize=14)
     #plt.ylabel("PC2 (" + str(int(100*explained_var[indexes[1]])) + "% variância explicada)", fontsize=18)
     #plt.xlabel("PC1 (" + str(int(100*explained_var[indexes[0]])) + "% variância explicada)", fontsize=18)
     #plt.tight_layout()
@@ -1545,7 +1563,11 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
 
         #----------INÍCIO SESSÃO ANÁLISE-----------#
 
-        #aplica_modelo(G, df_parlamentares_filtro)
+        if filtrar_tempo in ['tempo-ano', 'tempo-mandato']:
+            ano = filtro_ano
+            if filtrar_tempo == 'tempo-mandato':
+                ano = filtro_mandato
+            #aplica_modelo(G, df_parlamentares_filtro, ano)
 
         #----------FIM SESSÃO ANÁLISE-----------#
         
