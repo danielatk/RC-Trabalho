@@ -20,7 +20,10 @@ from addEdge import addEdge
 import scipy.spatial.distance as ssd
 from scipy.cluster.hierarchy import dendrogram, linkage
 from matplotlib import pyplot as plt
+import matplotlib.patches as mpatches
 from sklearn.manifold import MDS
+from sklearn.cluster import KMeans
+import random
 
 from analises import *
 
@@ -1374,6 +1377,9 @@ def converte_sim_dist(S):
     return D
 
 def aplica_modelo(G, df_parlamentares, ano):
+
+    random.seed(13)
+
     parlamentares = df_parlamentares['nome'].tolist()
 
     S_adamic = calcula_adamic(G, df_parlamentares)
@@ -1407,25 +1413,88 @@ def aplica_modelo(G, df_parlamentares, ano):
         cor = dic_cores[pos]
         cores.append(cor)
 
+    patches = []
+    for key in dic_cores:
+        patches.append(mpatches.Patch(color=dic_cores[key], label=key))
+
     fig1 = plt.figure(facecolor='white')
     ax1 = plt.axes()
     ax1.axhline(y=0, color='k')
     ax1.axvline(x=0, color='k')
     plt.scatter(X[:,0], X[:,1], color=cores, label=cores)
-    #plt.legend()
+    plt.legend(handles=patches)
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-    #for i, txt in enumerate(parlamentares):
-    #    ax1.annotate(txt, (X[i,0], X[i,1]), fontsize=14)
-    #plt.ylabel("PC2 (" + str(int(100*explained_var[indexes[1]])) + "% variância explicada)", fontsize=18)
-    #plt.xlabel("PC1 (" + str(int(100*explained_var[indexes[0]])) + "% variância explicada)", fontsize=18)
-    #plt.tight_layout()
+    plt.show()
+
+    n_clusters = 2
+
+    kmeans = KMeans(n_clusters=n_clusters, random_state=0, algorithm='full').fit(X)
+
+    color_list=['indigo','olivedrab','maroon']
+    cores = []
+
+    for i in range(len(parlamentares)):
+        cores.append(color_list[kmeans.labels_[i]])
+
+    patches = []
+    for i in range(n_clusters):
+        patches.append(mpatches.Patch(color=color_list[i], label='Cluster '+str(i+1)))
+
+    fig1 = plt.figure(facecolor='white')
+    ax1 = plt.axes()
+    ax1.axhline(y=0, color='k')
+    ax1.axvline(x=0, color='k')
+    plt.scatter(X[:,0], X[:,1], color=cores, label=cores)
+    plt.legend(handles=patches)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
     plt.show()
 
     criterios = ['single', 'complete', 'average', 'weighted', 'centroid', 'median', 'ward']
 
     for criterio in criterios:
+        clusters = []
+        for i in range(len(parlamentares)):
+            clusters.append([i])
         Z = linkage(D_cos_flat, criterio)
+        for i in range(Z.shape[0]):
+            index1 = int(Z[i,0])
+            index2 = int(Z[i,1])
+            novo_cluster = []
+            for j in range(len(clusters[index1])):
+                novo_cluster.append(int(clusters[index1][j]))
+            for j in range(len(clusters[index2])):
+                novo_cluster.append(int(clusters[index2][j]))
+            clusters.append(novo_cluster)
+        indices_clusters = []
+        indices_clusters.append(int(Z[-1,0]))
+        indices_clusters.append(int(Z[-1,1]))
+        #indices_clusters.append(int(min(int(Z[-1,0]),int(Z[-1,1]))))
+        #indices_clusters.append(int(Z[int(int(max(Z[-1,0],Z[-1,1]))%len(parlamentares)),0]))
+        #indices_clusters.append(int(Z[int(int(max(Z[-1,0],Z[-1,1]))%len(parlamentares)),1]))
+        clusters_certos = []
+        for index in indices_clusters:
+            clusters_certos.append(clusters[index])
+        cores = [0]*len(parlamentares)
+        for i in range(len(clusters_certos)):
+            for j in range(len(clusters_certos[i])):
+                cores[clusters_certos[i][j]] = color_list[i]
+        patches = []
+        for i in range(n_clusters):
+            patches.append(mpatches.Patch(color=color_list[i], label='Cluster '+str(i+1)))
+
+        fig1 = plt.figure(facecolor='white')
+        ax1 = plt.axes()
+        ax1.axhline(y=0, color='k')
+        ax1.axvline(x=0, color='k')
+        plt.scatter(X[:,0], X[:,1], color=cores, label=cores)
+        plt.legend(handles=patches)
+        plt.xticks(fontsize=12)
+        plt.yticks(fontsize=12)
+        plt.title('Clusterização Hierárquica com critério ' + criterio + ' em espaço MDS')
+        plt.show()
+
         fig = plt.figure(figsize=(25, 10))
         dn = dendrogram(Z, labels=parlamentares)
         folhas = dn['leaves']
