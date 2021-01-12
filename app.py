@@ -98,7 +98,7 @@ mostrar_tempo = [{'label': 'Nenhum', 'value':'tempo-todos'},
                  {'label': 'Mostrar por ano', 'value':'tempo-ano'},
                  {'label': 'Mostrar por mandato eleitoral', 'value':'tempo-mandato'}]
 anos = [{'label':str(i), 'value':i} for i in range(1991,2021)]
-mandatos_eleitorais = [{'label':'{} - {}'.format(i, i+3), 'value':i} for i in range(1991,2021,4)]
+mandatos_eleitorais = [{'label':'{} - {}'.format(i, i+4), 'value':i} for i in range(1991,2021,4)]
 #[{'label': 'Todos', 'value':'mandato-todos'}]
 cores_partidos = {
     'PDT' : px.colors.qualitative.Alphabet[0],
