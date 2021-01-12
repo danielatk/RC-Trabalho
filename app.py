@@ -98,7 +98,7 @@ mostrar_tempo = [{'label': 'Nenhum', 'value':'tempo-todos'},
                  {'label': 'Mostrar por ano', 'value':'tempo-ano'},
                  {'label': 'Mostrar por mandato eleitoral', 'value':'tempo-mandato'}]
 anos = [{'label':str(i), 'value':i} for i in range(1991,2021)]
-mandatos_eleitorais = [{'label':'{} - {}'.format(i, i+3), 'value':i} for i in range(1991,2021,4)]
+mandatos_eleitorais = [{'label':'{} - {}'.format(i, i+4), 'value':i} for i in range(1991,2021,4)]
 #[{'label': 'Todos', 'value':'mandato-todos'}]
 cores_partidos = {
     'PDT' : px.colors.qualitative.Alphabet[0],
@@ -624,6 +624,35 @@ def get_curr_partido(filiacoes, ano):
     return partido
 
 
+def check_party_change(nome, filiacoes, anoInicio, anoFim):
+    print(f"Filiações de {nome}: \t\tEntre {anoInicio} e {anoFim}")
+
+    for filiacao in filiacoes:
+        jsstr = filiacao.replace("\'", "\"")
+        jsstr = jsstr.replace("None", "\"None\"")
+
+        fil = js.loads(jsstr)
+
+        if int(fil['data_filiacao'][:4]) <= anoFim:
+            termino = fil['data_desfiliacao']
+            if termino == 'None':
+                # Achei o partido!
+                codigo = int(fil['cod'])
+
+                partido = df_partidos[df_partidos['cod'] == codigo]
+                partido = partido['sigla'].iloc[0]
+                print(f"\t{partido} - Início em {fil['data_filiacao']}")
+                break
+
+            if int(termino[:4]) > anoInicio:
+                codigo = int(fil['cod'])
+
+                partido = df_partidos[df_partidos['cod'] == codigo]
+                partido = partido['sigla'].iloc[0]
+                print(f"\t{partido} - De {fil['data_filiacao']} a {termino}")
+
+
+
 def colore_por_atributo(df_parlamentares, coloracao_nos, ano=None):
     colors_node = []
     if coloracao_nos == 'ativo':
@@ -638,6 +667,7 @@ def colore_por_atributo(df_parlamentares, coloracao_nos, ano=None):
             ano = 2020
         return colore_por_partido(df_parlamentares, ano)[0]
     return colors_node
+
 
 '''def cria_trace(G, df_parlamentares, cores):
     pos = nx.circular_layout(G) #nx.random_layout(G)
@@ -1197,9 +1227,12 @@ def cria_trace_bipartido(G, df_parlamentares, df_materias, pos, cores, ano=None)
             if not pd.isnull(parlamentar.email.values[0]):
                 node_text_senadores[-1] = node_text_senadores[-1] + \
                                           '<br>e-mail: ' + str(parlamentar.email.values[0])
-                if ano:
-                    partido = get_curr_partido(parlamentar.filiacoes.values[0], ano)
-                    node_text_senadores[-1] += '<br>Partido: ' + partido
+            if ano:
+                partido = get_curr_partido(parlamentar.filiacoes.values[0], ano)
+                node_text_senadores[-1] += '<br>Partido: ' + partido
+
+                ## Verificação se muda de partido
+                #check_party_change(parlamentar.nome.values[0], parlamentar.filiacoes.values[0], ano, 2020)
         else: # é matéria
             node_text_materias.append('Subtipo da matéria: ' + str(df_materias[df_materias['cod'] == node].nome_subtipo.values[0]))
 
