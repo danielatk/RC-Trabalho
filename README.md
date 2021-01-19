@@ -1,31 +1,22 @@
 # Trabalho Final de Redes Complexas
 
-Descrição do trabalho: <br>
-Uma rede direcionada, onde o senador X aponta pro senador Y se X votou numa matéria em que o senador Y foi o autor principal, e o peso da aresta é a quantidade de votos. Fazer duas redes. Uma em que as arestas representam voto positivo e outra em que as arestas representam votos negativos. <br>
-Uma outra possibilidade é uma rede não direcionada onde os senadores tão ligados se eles coautoraram uma matéria.
+Aplicativo de visualização das redes de votação do Senado Federal. 
+A página pode ser utilizada fazendo download deste repositório e 
+rodando o arquivo ``app.py`` no terminal.
 
-features:
--no site botar as arestas só quando escolher o nó. <br>
--no site mostrar informação e foto quando clicar no parlamentar. <br>
--no site botar filtro de data. <br>
--no site botar filtro de parlamentares. <br>
--colocar os partidos em cores nos nós. <br>
--colocar as cores nos nós de acordo com alinhamento ao governo atual <br>
+Atualmente há dois tipos de redes implementadas:
 
-tabelas necessárias: <br>
--http://legis.senado.leg.br/dadosabertos/senador/22 <br>
--http://legis.senado.leg.br/dadosabertos/senador/22/filiacoes <br>
--http://legis.senado.leg.br/dadosabertos/senador/22/votacoes <br>
--http://legis.senado.leg.br/dadosabertos/senador/22/autorias <br>
--http://legis.senado.leg.br/dadosabertos/senador/partidos <br>
+    1. Redes de senadores, com arestas direcionadas apontando do 
+    senador votante para o senador autor primário de uma matéria
+    2. Redes bipartidas de senadores e matérias, com as arestas 
+    juntando o senador votante e a matéria
+    
+A página é capaz de plotar as redes de senadores, coloridos por 
+seu caráter de atividade ou afastamento do posto. Diferentes 
+redes podem ser geradas filtrando os nós e arestas por tempo, 
+senadores, tipo de matéria, entre outros. Além disso, ela é 
+capaz de realizar análises como as características da 
+distribuição de grau e centralidade por PageRank. 
 
-
-### Referência sugerida pelo prof:
- - Artigo: Homofilia e Assimetria na Rede de Coautoria de Proposições de Lei do Congresso Brasileiro. Brazilian Workshop on Social Network Analysis and Mining (BraSNAM), 2019 
-([SBC Open Lib](https://sol.sbc.org.br/index.php/brasnam/article/view/6544)) 
-
-Dicas:
- - Cuidado com os significados das arestas: precisa ser bem definido 
- e ter significado
- - Calcular assortividade em relação ao partido e/ou estado do senador
- - Noção de coesão
+Um vídeo ilustrativo pode ser visto no arquivo 
+[funcionamento_site](funcionamento_site.mov).
