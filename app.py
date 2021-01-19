@@ -1600,6 +1600,8 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
 
     #--------------FIM DA PARTE---------------
 
+    analise = []
+
     if tipo_rede == 'favor' or tipo_rede == 'contra':
         # Filtro temportal
         if filtrar_tempo == 'tempo-ano':
@@ -1617,11 +1619,13 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
 
         cores_dos_nos = None
         ano = None
+        atributo = None
 
         if coloracao_nos == 'ativo':
             cores_dos_nos, atr_dict = colore_por_afastamento(df_parlamentares_filtro)
             if metrica_analise == 'analise-assortatividade':
-                nx.set_node_attributes(G, atr_dict, name="Ativo/Afastado")
+                atributo = "Ativo/Afastado"
+                nx.set_node_attributes(G, atr_dict, name=atributo)
 
         elif coloracao_nos == 'partido' and filtrar_tempo in ['tempo-ano', 'tempo-mandato']:
             ano = filtro_ano
@@ -1629,10 +1633,11 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
                 ano = filtro_mandato
             cores_dos_nos, atr_dict = colore_por_partido(df_parlamentares_filtro, ano)
             if metrica_analise == 'analise-assortatividade':
-                nx.set_node_attributes(G, atr_dict, name="Partido")
+                atributo = "Partido"
+                nx.set_node_attributes(G, atr_dict, name=atributo)
 
         edge_trace, node_trace = cria_trace(df_parlamentares_filtro, df_arestas, cores_dos_nos, ano)
-        analise = analisar_grafo(G, metrica_analise, atributo="Ativo/Afastado")
+        analise = analisar_grafo(G, metrica_analise, atributo=atributo)
         fig = plotta_grafo(edge_trace, node_trace)
 
     elif tipo_rede == 'favor-bipartido' or tipo_rede == 'contra-bipartido':
@@ -1651,6 +1656,7 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
             G = cria_grafo_bipartido(df_parlamentares_filtro, df_materias_filtro, tipo_rede)
         
         ano = None
+
         if filtrar_tempo == 'tempo-ano':
             ano = filtro_ano
         elif filtrar_tempo == 'tempo-mandato':
@@ -1664,6 +1670,9 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
                 print('cod igual ' + str(cod) + ' em mat')'''
 
         #----------INÍCIO SESSÃO ANÁLISE-----------#
+        #print("Tamanho da rede: ", len(G.nodes))
+        #print("\t", len(df_parlamentares_filtro), " parlamentares")
+        #print("\t", len(df_materias_filtro), " matérias")
 
         if filtrar_tempo in ['tempo-ano', 'tempo-mandato']:
             ano = filtro_ano
@@ -1676,8 +1685,9 @@ def gera_nova_rede(n_cliques, tipo_rede, filtro_senadores, coloracao_nos, filtra
 
         pos = cria_pos_bipartido(G)
         edge_trace, node_trace_senadores, node_trace_materias = cria_trace_bipartido(G, df_parlamentares_filtro, df_materias_filtro, pos, coloracao_nos, ano)
+        analise = analisar_grafo(G, metrica_analise, atributo=None)
         fig = plotta_grafo_bipartido(edge_trace, node_trace_senadores, node_trace_materias)
-        analise = []
+        # analise = []
         
     fig.update_layout(transition_duration=500)
     print('update')
